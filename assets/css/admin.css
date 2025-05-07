@@ -1,0 +1,710 @@
+ @font-face {
+     font-family: Roboto;
+     src: url('../font_Roboto/Roboto-Regular.ttf');
+     font-style: normal;
+ }
+
+ @font-face {
+     font-family: Roboto-Bold;
+     src: url('../font_Roboto/Roboto-Bold.ttf');
+     font-style: normal;
+ }
+
+ @font-face {
+     font-family: Roboto-Light;
+     src: url('../font_Roboto/Roboto-Light.ttf');
+     font-style: normal;
+ }
+
+ * {
+     margin: 0;
+     padding: 0;
+     box-sizing: border-box;
+ }
+
+ li {
+     list-style: none;
+ }
+
+ a {
+     text-decoration: none;
+ }
+
+ body {
+     font-family: Roboto;
+     background-color: #f5f5f5;
+ }
+
+ .container,
+ .row {
+     padding: 0;
+     margin: 0;
+ }
+
+ .line_up {
+     padding: 0;
+     margin: 0;
+     display: flex;
+     flex-wrap: wrap;
+ }
+
+ .main_frame {
+     padding: 20px 0 0 0;
+ }
+
+ /*---------- header ----------*/
+ /* .sidebar {
+    display: none;
+} */
+
+ .top {
+     z-index: 1;
+     position: fixed;
+     top: 0;
+     height: 60px;
+     width: 100%;
+     color: #ffffff;
+     background-color: #001c40;
+ }
+
+
+ .tab_menu>i,
+ .sign_out i {
+     padding: 17px;
+     background-color: #ffd43b;
+     color: #001c40;
+ }
+
+ .close_tab {
+     text-align: end;
+ }
+
+ .close_tab i {
+     padding: 17px 20px;
+     cursor: pointer;
+     color: #001c40;
+     background-color: #ffd43b;
+ }
+
+ .sidebar {
+     z-index: 2;
+ }
+
+ .sidebar>i:first-child {
+     text-align: end;
+ }
+
+ .close_tab i:hover,
+ .tab_menu>i:hover,
+ .sign_out i:hover {
+     transition: all 0.3s ease;
+     color: #ffffff;
+     background-color: #c6edfd;
+ }
+
+ .tab_menu {
+     float: left;
+ }
+
+ .sign_out {
+     float: right;
+ }
+
+ .sidebar {
+     padding: 20px 10px;
+     position: fixed;
+     left: 0;
+     height: 100%;
+     width: 250px;
+     color: #ffffff;
+     background-color: #001c40;
+ }
+
+ .user {
+     text-align: center;
+     line-height: 1.5;
+ }
+
+ .user_avatar i {
+     padding-top: 4px;
+     height: 50px;
+     width: 50px;
+     border: 3px solid #ffffff;
+     border-radius: 50%;
+ }
+
+ .user_name {
+     font-size: 17px;
+     font-family: Roboto-Bold;
+ }
+
+ .user_designation {
+     font-size: 14px;
+ }
+
+ .menu li {
+     height: 55px;
+     width: 215px;
+     border-radius: 5px;
+     padding: 15px;
+     margin: 10px;
+     cursor: pointer;
+ }
+
+ .menu a {
+     color: #ffffff;
+ }
+
+ .menu i {
+     width: 40px;
+ }
+
+ .menu .active,
+ .menu li:hover {
+     background-color: #c6edfd;
+     transition: all 0.3s ease;
+ }
+
+ .menu .active,
+ .menu li:hover {
+     color: #001c40;
+     transition: all 0.3s ease;
+ }
+
+ /*---------- content ----------*/
+
+ .navbar {
+     z-index: 1;
+ }
+
+ .content {
+     margin-left: 250px;
+     padding: 60px 10px 10px 10px;
+     justify-content: center;
+ }
+
+ .content .title {
+     font-family: Roboto-Bold;
+     font-size: 13px;
+     background-color: #ffffff;
+     border-radius: 5px;
+     border-left: 6px solid #ffd43b;
+     padding: 10px 30px;
+     margin-bottom: 20px;
+ }
+
+ .box_shadow {
+     box-shadow: 1px 1px 5px 2px rgba(0, 0, 0, 0.14);
+ }
+
+ .box_card {
+     border-radius: 5px;
+     margin-bottom: 20px;
+     background-color: #ffffff;
+     transition: transform 0.3s ease, box-shadow 0.3s ease;
+ }
+
+ .box_summary:hover {
+     transform: translateY(-5px);
+     /* Dịch chuyển lên một chút khi hover */
+     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+     /* Tăng độ bóng đổ */
+ }
+
+ .box_card .card-header {
+     font-size: 15px;
+     font-family: Roboto-Bold;
+     color: #d20000;
+     padding: 8px 16px;
+     border-bottom: 1px solid #dddddd;
+     background-color: #dddddd50;
+ }
+
+ .box_card .card-body {
+     padding: 16px;
+ }
+
+ .box_card .card-title {
+     margin-bottom: 8px;
+     font-size: 16px;
+     font-family: Roboto-Bold;
+     color: #333333;
+ }
+
+ .box_card .card-text {
+     font-size: 14px;
+ }
+
+ /*---------- data product ----------*/
+
+ .element_btn {
+     padding: 10px;
+     display: flex;
+     justify-content: space-between;
+ }
+
+ .element_btn i {
+     padding-right: 5px;
+ }
+
+ .addnew_button {
+     font-size: 13px;
+     color: #003c00;
+     border-radius: 5px;
+     padding: 6px 12px;
+     font-family: Roboto-Bold;
+     background-color: #9dff9d;
+ }
+
+ .addnew_btn {
+     color: #003c00;
+     background-color: #9dff9d;
+     border-radius: 5px;
+     font-size: 14px;
+     font-family: Roboto-Bold;
+     padding: 10px 20px;
+     margin-top: 100px;
+ }
+
+ .addnew_btn:hover {
+     color: #9dff9d;
+     background-color: #003c00;
+ }
+
+ .addnew_button:hover {
+     color: #9dff9d;
+     background-color: #003c00;
+ }
+
+ .edit_btn {
+     color: #fa9a14;
+     background-color: #fbe2c5;
+     padding: 6px 12px;
+     border-radius: 5px;
+ }
+
+ .edit_btn:hover {
+     color: #fbe2c5;
+     background-color: #fa9a14;
+ }
+
+ .table {
+     margin-top: 15px;
+ }
+
+ .table img {
+     width: 70px;
+ }
+
+ .table th,
+ .table td {
+     font-size: 14px;
+     padding: 12px;
+     text-align: center;
+     height: 80px;
+     max-width: 250px;
+     /* Chiều rộng cụ thể cho cột "Mật khẩu" */
+     word-wrap: break-word;
+     /* Cho phép xuống dòng từ */
+     overflow-wrap: break-word;
+     /* Đảm bảo xuống dòng nếu quá chiều rộng */
+ }
+
+ .table tr:hover {
+     background-color: #e2e3e560;
+ }
+
+ .table-statistic {
+     max-height: 500px;
+     /* Chiều cao tối đa của bảng */
+     overflow-y: auto;
+     /* Hiển thị thanh cuộn dọc nếu vượt quá chiều cao */
+     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+     /* Thêm bóng đổ */
+ }
+
+ .trash,
+ .ban {
+     border: none;
+     color: #de0400;
+     background-color: #f7c3c2;
+ }
+
+ .trash:hover,
+ .ban:hover {
+     color: #f7c3c2;
+     background-color: #de0400;
+ }
+
+ .edit {
+     border: none;
+     color: #fa9a14;
+     background-color: #fbe2c5;
+ }
+
+ .unban {
+     border: none;
+     color: #fa9a14;
+     background-color: #fbe2c5;
+     display: none;
+ }
+
+ .edit:hover,
+ .unban:hover {
+     color: #fbe2c5;
+     background-color: #fa9a14;
+ }
+
+ .swal-button {
+     background: #bfffb8;
+     border-radius: 5px;
+     box-shadow: none;
+     color: #0d8800;
+     border: none;
+ }
+
+ .swal-button--cancel {
+     color: #d21010;
+     border: none;
+     background-color: #ffbdbd;
+ }
+
+ .add_product,
+ .edit_product {
+     text-align: end;
+     margin-top: 6px;
+ }
+
+ /*---------- form product ----------*/
+
+ .title a {
+     color: #212529;
+ }
+
+ .title ul li {
+     padding-left: 10px;
+ }
+
+ .sub_title {
+     padding: 20px;
+ }
+
+ .sub_title div {
+     height: 2px;
+     width: 100%;
+     background-color: #FFD43B;
+ }
+
+ .form_add {
+     padding-bottom: 15px;
+ }
+
+ .form_group {
+     padding-top: 20px;
+ }
+
+ .form_edit img,
+ .form_add img {
+     width: 150px;
+     margin-right: 30px;
+     margin-top: 20px;
+ }
+
+ .hinh {
+     width: 50% !important;
+     background-color: #007bff !important;
+     /* Màu nền */
+     color: white !important;
+     /* Màu chữ */
+     font-size: 16px;
+     /* Cỡ chữ */
+     border: none;
+     /* Bỏ viền */
+     border-radius: 5px;
+     /* Bo góc */
+     padding: 10px 20px;
+     /* Khoảng cách nội dung */
+     cursor: pointer;
+     /* Hiển thị biểu tượng con trỏ khi hover */
+     text-align: center;
+     /* Canh giữa chữ */
+     display: inline-block;
+     /* Định dạng inline */
+ }
+
+ .hinh:hover {
+     background-color: #0056b3 !important;
+     /* Đổi màu nền khi hover */
+     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+     /* Hiệu ứng đổ bóng khi hover */
+ }
+
+ .hinh:active {
+     background-color: #003d80 !important;
+     /* Màu nền khi click */
+     transform: translateY(2px);
+     /* Hiệu ứng nhấn nút */
+ }
+
+
+ .thumb {
+     z-index: 999;
+ }
+
+ .thumb:hover {
+     filter: brightness(0.5);
+ }
+
+ .time {
+     position: absolute;
+     margin-left: -30px;
+     margin-top: 10px;
+     cursor: pointer;
+     background-color: #ce0122;
+     color: white;
+ }
+
+ /*---------- order product ----------*/
+
+ #past3M,
+ #past1Y {
+     display: none;
+ }
+
+ .tab {
+     padding-top: 15px;
+     display: flex;
+ }
+
+ .tab li {
+     margin-right: 20px;
+     padding: 6px 12px;
+     cursor: pointer;
+     background-color: #c6edfd;
+     color: #001c40;
+     border-radius: 5px;
+ }
+
+ .tab li.active_tab {
+     background-color: #001c40;
+     color: #c6edfd;
+ }
+
+ @media (max-width: 768px) {
+     header>.sidebar {
+         display: none;
+     }
+
+     .content {
+         margin-left: 0;
+     }
+
+     .form_edit {
+         margin-left: 0;
+     }
+ }
+
+ .finish {
+     color: #02790c;
+     background-color: #bfefc4;
+ }
+
+ .wait {
+     color: #0f2094;
+     background-color: #b6bef5;
+ }
+
+ .delivery {
+     color: #8b9400;
+     background-color: #f2f98a;
+ }
+
+ .cancelled {
+     color: #a90312;
+     background-color: #f9c9cd;
+ }
+
+ .finish,
+ .wait,
+ .delivery,
+ .cancelled {
+     font-family: Roboto-Bold;
+ }
+
+ /*---------- revenue statistics ----------*/
+
+ .top_title_table {
+     font-family: Roboto-Bold;
+ }
+
+ .top_title_table h4 {
+     margin: 0 5px;
+ }
+
+ .top_title_table hr {
+     background-color: #ffd43b;
+     height: 2px;
+     border: none;
+     opacity: 1;
+     margin: 10px 5px;
+ }
+
+ /*---------- user ----------*/
+
+ .active_ban {
+     color: red;
+ }
+
+
+ #editableDiv {
+     border: 1px solid #ccc;
+     padding: 10px;
+     min-height: 200px;
+     /* Chiều cao tương đương với textarea có rows=10 */
+     max-width: 100%;
+     /* Đảm bảo khung không vượt quá chiều rộng của trang */
+     overflow-wrap: break-word;
+     /* Đảm bảo văn bản không bị tràn */
+     overflow-y: auto;
+     resize: vertical;
+     /* Cho phép thay đổi kích thước chiều cao */
+     font-family: Arial, sans-serif;
+     /* Đảm bảo font giống như textarea */
+     font-size: 16px;
+     /* Đảm bảo kích thước font giống như textarea */
+ }
+
+ #editableDiv img {
+     max-width: 300px;
+     max-height: 200px;
+     width: auto;
+     height: auto;
+     display: block;
+     margin: 10px 0;
+ }
+
+ #imageInput {
+     display: none;
+ }
+
+ /* Tạo nút thay thế */
+ .custom-upload-button {
+     font-size: 14px;
+     font-weight: 600;
+     padding: 10px 20px;
+     display: inline-block;
+     background-color: #007bff;
+     /* Màu xanh dương */
+     color: white;
+     cursor: pointer;
+     border-radius: 5px;
+     border: none;
+     transition: background-color 0.3s ease;
+ }
+
+
+ /* Hiệu ứng hover */
+ .custom-upload-button:hover {
+     background-color: #0056b3;
+     /* Màu xanh đậm hơn khi hover */
+ }
+
+
+ .filter-container {
+     display: flex;
+     width: 80% !important;
+ }
+
+ .filter-group {
+     width: 40%;
+     display: flex;
+ }
+
+ .filter-label {
+     width: 25%;
+     margin: 0 6px 0 0;
+     display: flex;
+     align-items: center;
+ }
+
+ .filter-input {
+     width: 60%;
+     height: 36px;
+ }
+
+ .filter-button {
+     width: 100px;
+     margin: 0;
+     height: 36px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     padding: 10px;
+     background-color: #28a745;
+     color: white;
+     border: none;
+     border-radius: 3px;
+ }
+
+ .tab {
+     display: flex;
+     list-style: none;
+     padding: 0;
+     margin-bottom: 20px;
+ }
+
+ .tab_item {
+     padding: 10px 20px;
+     cursor: pointer;
+     border: 1px solid #ddd;
+     background-color: #f1f1f1;
+     margin-right: 5px;
+ }
+
+ .tab_item.active_tab {
+     background-color: #007bff;
+     color: white;
+ }
+
+ /* CSS cho các phần nội dung */
+ .tab-content {
+     display: none;
+ }
+
+ .tab-content.active {
+     display: flex;
+ }
+
+ .filter-status .filter-label {
+     width: auto;
+     margin-right: 8px;
+ }
+
+ .filter-status .filter-input {
+     width: 20%;
+     margin-right: 10px;
+     background-color: white;
+     border: 1px solid grey;
+     border-radius: 4px;
+     padding-left: 10px;
+ }
+
+ .pagination {
+     display: flex;
+     justify-content: center;
+ }
+
+ .pagination button {
+     margin: 0 5px;
+     padding: 5px 10px;
+     cursor: pointer;
+ }
+
+ .active-page {
+     font-weight: bold;
+     text-decoration: underline;
+ }
+
+ .item {
+     margin: 5px 0;
+ }

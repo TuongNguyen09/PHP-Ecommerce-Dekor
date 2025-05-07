@@ -1,0 +1,228 @@
+@font-face {
+    font-family: Roboto;
+    src: url('../font_Roboto/Roboto-Regular.ttf');
+    font-style: normal;
+}
+
+@font-face {
+    font-family: Roboto-Bold;
+    src: url('../font_Roboto/Roboto-Bold.ttf');
+    font-style: normal;
+}
+
+@font-face {
+    font-family: Roboto-Light;
+    src: url('../font_Roboto/Roboto-Light.ttf');
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+li {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+.line_up {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+
+/*---------- detail item ----------*/
+
+.category_right img {
+    width: 100%;
+}
+
+.details_pro {
+    padding-top: 20px;
+}
+
+.status_name {
+    color: #e57368;
+}
+
+.title_product,
+.price_box,
+.form_btn_detail p {
+    font-family: Roboto-Bold;
+}
+
+.title_product {
+    font-size: 30px;
+}
+
+.price_box {
+    font-size: 24px;
+}
+
+  /* Ẩn mũi tên tăng giảm trong trình duyệt Chrome, Edge */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+  /* Ẩn mũi tên tăng giảm trong Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+.flying-product {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    z-index: 999;
+    transition: all 0.8s ease-in-out;
+    pointer-events: none;
+}
+
+
+.info_product {
+    font-size: 14px;
+    padding: 15px 0 25px 0;
+}
+
+.form_btn_detail {
+    display: flex;
+    align-items: center;
+}
+
+.add_to_cart_btn {
+    box-sizing: border-box;
+    margin-left: 20px;
+    display: inline-block;
+    background-color: #B71C1C; /* Màu nền tối */
+    color: #fff; /* Màu chữ trắng */
+    padding: 12px 20px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 6px; /* Bo góc nhẹ */
+    text-decoration: none; /* Xóa gạch dưới của liên kết */
+    transition: background-color 0.3s ease; /* Chỉ chuyển màu nền khi hover */
+    cursor: pointer;
+}
+
+.add_to_cart_btn:hover {
+    background-color: #D32F2F; /* Màu nền khi hover */
+    color: #fff; /* Màu chữ khi hover */
+}
+
+
+.btn_added {
+    opacity: 1;
+    display: inline-block;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    white-space: nowrap;
+    vertical-align: top;
+}
+
+.is-form {
+    overflow: hidden;
+    position: relative;
+    background-color: #f9f9f9;
+    height: 2.2rem;
+    width: 1.9rem;
+    padding: 0;
+    text-shadow: 1px 1px 1px #fff;
+    border: 1px solid #ddd;
+}
+
+.is-form:focus,
+.input-text:focus {
+    outline: none;
+}
+
+.is-form.minus {
+    border-radius: 4px 0 0 4px;
+}
+
+.is-form.plus {
+    border-radius: 0 4px 4px 0;
+}
+
+.input-qty {
+    background-color: #fff;
+    height: 2.2rem;
+    text-align: center;
+    font-size: 1rem;
+    display: inline-block;
+    vertical-align: top;
+    margin: 0;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-left: 0;
+    border-right: 0;
+    padding: 0;
+}
+
+.input-qty::-webkit-outer-spin-button,
+.input-qty::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+}
+
+
+/*---------- product tab ----------*/
+
+.product_tab {
+    min-height: 800px;
+    padding: 0;
+    margin: 40px 0 40px 0;
+}
+
+.tab_link h3 {
+    font-size: 18px;
+    text-align: center;
+    margin: 0;
+    color: #818181;
+    padding: 15px;
+    cursor: pointer;
+}
+
+.tabs_title {
+    padding: 60px 0 20px 0;
+    align-items: center;
+}
+
+.tabs_title li {
+    padding: 0;
+}
+
+.active h3 {
+    background-color: #6dd3d1;
+    color: #ffffff;
+}
+
+.tab_float {
+    font-size: 14px;
+    padding-bottom: 20px;
+    max-height: auto;
+}
+
+.tab_float img {
+    width: 30%;
+    height: auto;
+}
+
+.tab_1 {
+    text-align: center;
+}
+
+.tab_1 p {
+    text-align: left;
+}
+
+.tab_2 {
+    display: none;
+}
