@@ -58,28 +58,28 @@
                     <h4>TIN MỚI</h4>
                     <div class="news_item row">
                         <div class="col-2 news_img">
-                            <img src="./assets/imgs/news/news_1.png">
+                            <img src="/PHP-Ecommerce-Dekor/assets/imgs/news/news_1.png">
                         </div>
                         <div class="col-9 news_info">
-                            <h5><a href="./header/TinTuc1.html">Bí quyết bảo quản nội thất gỗ</a></h5>
+                            <h5><a href="/PHP-Ecommerce-Dekor/header/TinTuc1.html">Bí quyết bảo quản nội thất gỗ</a></h5>
                             <p>11/11/2022</p>
                         </div>
                     </div>
                     <div class="news_item row">
                         <div class="col-2 news_img">
-                            <img src="./assets/imgs/news/news_2.png">
+                            <img src="/PHP-Ecommerce-Dekor/assets/imgs/news/news_2.png">
                         </div>
                         <div class="col-9 news_info">
-                            <h5><a href="./header/Tintuc2.html">Kinh nghiệm mua, bảo quản nội thất</a></h5>
+                            <h5><a href="/PHP-Ecommerce-Dekor/header/Tintuc2.html">Kinh nghiệm mua, bảo quản nội thất</a></h5>
                             <p>11/11/2022</p>
                         </div>
                     </div>
                     <div class="news_item row">
                         <div class="col-2 news_img">
-                            <img src="./assets/imgs/news/news_3.png" alt="">
+                            <img src="/PHP-Ecommerce-Dekor/assets/imgs/news/news_3.png" alt="">
                         </div>
                         <div class="col-9 news_info">
-                            <h5><a href="./header/Tintuc3.html">Bố trí nội thất, cần tránh những gì ?</a></h5>
+                            <h5><a href="/PHP-Ecommerce-Dekor/header/Tintuc3.html">Bố trí nội thất, cần tránh những gì ?</a></h5>
                             <p>11/11/2022</p>
                         </div>
                     </div>

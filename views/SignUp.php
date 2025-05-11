@@ -118,8 +118,6 @@ if (session_status() == PHP_SESSION_NONE) {
     include './templates/Footer.php';
     ?>
     <!--Kết Thúc Phần Nội Dung-->
-    <script src="../../SanPham/js/account.js"></script>
-    <script src="../../SanPham/js/product.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('register');

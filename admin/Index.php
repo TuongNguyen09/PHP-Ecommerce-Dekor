@@ -1,3 +1,17 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['adminId'])) {
+    echo "<script>
+        alert('Vui lòng đăng nhập với quyền admin');
+        window.location.href = 'signinadmin.php';
+    </script>";
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -21,83 +35,9 @@
 </head>
 
 <body>
-    <header>
-        <div class="top">
-            <div class="tab_menu">
-                <i class="fas fa-bars" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button"
-                    aria-controls="offcanvasExample"></i>
-                <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample"
-                    aria-labelledby="offcanvasExampleLabel" style="width: 250px;">
-                    <div class="sidebar">
-                        <div class="close_tab">
-                            <i class="fas fa-xmark" data-bs-dismiss="offcanvas"></i>
-                        </div>
-                        <div class="user">
-                            <div class="user_avatar">
-                                <i class="fa-solid fa-user fa-2x"></i>
-                            </div>
-                            <div>
-                                <div class="user_name">
-                                    <a href="./infoAdmin.html" style="color:aliceblue;"></a>
-                                </div>
-                                <div class="user_designation">
-                                    <p>Chào mừng bạn trở lại</p>
-                                </div>
-                            </div>
-                            <hr>
-                        </div>
-                        <div class="menu">
-                            <a href="./admin.html">
-                                <li class="menu_item active"><i class="fas fa-house"></i>Trang chủ</li>
-                            </a>
-                            <a href="./data_product.html">
-                                <li class="menu_item"><i class="fas fa-tag"></i>Quản lý sản phẩm</li>
-                            </a>
-                            <a href="./data_oder.html">
-                                <li class="menu_item"><i class="fas fa-bag-shopping"></i>Quản lý đơn hàng</li>
-                            </a>
-                            <a href="./data_user.html">
-                                <li class="menu_item"><i class="fas fa-address-card"></i>Quản lý người dùng</li>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="sign_out">
-                <a href="#" onclick="logoutAdmin()"><i class="fas fa-right-from-bracket"></i></a>
-            </div>
-        </div>
-        <div class="sidebar">
-            <div class="user">
-                <div class="user_avatar">
-                    <i class="fa-solid fa-user fa-2x"></i>
-                </div>
-                <div>
-                    <div class="user_name">
-                        <a href="./infoAdmin.html" style="color:aliceblue;"></a>
-                    </div>
-                    <div class="user_designation">
-                        <p>Chào mừng bạn trở lại</p>
-                    </div>
-                </div>
-                <hr>
-            </div>
-            <div class="menu">
-                <a href="./admin.html">
-                    <li class="menu_item active"><i class="fas fa-house"></i>Trang chủ</li>
-                </a>
-                <a href="./data_product.html">
-                    <li class="menu_item"><i class="fas fa-tag"></i>Quản lý sản phẩm</li>
-                </a>
-                <a href="./data_oder.html">
-                    <li class="menu_item"><i class="fas fa-bag-shopping"></i>Quản lý đơn hàng</li>
-                </a>
-                <a href="./data_user.html">
-                    <li class="menu_item"><i class="fas fa-address-card"></i>Quản lý người dùng</li>
-                </a>
-            </div>
-        </div>
-    </header>
+    <?php
+    include './Header.php';
+    ?>
 
     <div class="content">
         <div class="row">
@@ -163,7 +103,7 @@
                     <label for="toDate-Products" class="filter-label">Đến ngày:</label>
                     <input type="date" class="filter-input" id="toDate-Products">
                 </div>
-                <button onclick="renderProductsTableFromLocalStorage()" class="filter-button">Lọc</button>
+                <button id="filterProductsButton" class="filter-button">Lọc</button>
             </div>
             <div class="table-responsive-lg table-statistic">
                 <table class="table table-bordered" id="table-product-revenue">
@@ -175,6 +115,7 @@
                             <th scope="col">Danh mục</th>
                             <th scope="col">Số lượng bán ra</th>
                             <th scope="col">Tổng doanh thu</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -185,254 +126,9 @@
                             <td>Bàn gỗ</td>
                             <td>6</td>
                             <td>138.000.000 VND</td>
-                        </tr>
-                        <tr>
-                            <td>den3</td>
-                            <td>Đèn tường Composite An Phước B948</td>
-                            <td>10.000.000</td>
-                            <td>Đèn trang trí</td>
-                            <td>7</td>
-                            <td>70.000.000 VND</td>
-                        </tr>
-                        <tr>
-                            <td>ban1</td>
-                            <td>Bàn cafe tròn gỗ đẹp</td>
-                            <td>4.500.000</td>
-                            <td>Bàn gỗ</td>
-                            <td>8</td>
-                            <td>36.000.000 VND</td>
-                        </tr>
-                        <tr>
-                            <td>ban2</td>
-                            <td>Bàn GTY 091</td>
-                            <td>3.500.000</td>
-                            <td>Bàn gỗ</td>
-                            <td>8</td>
-                            <td>28.000.000 VND</td>
-                        </tr>
-                        <tr>
-                            <td>den2</td>
-                            <td>Đèn trang trí vách cao cấp pha lê Netviet NV 9005/2</td>
-                            <td>970.000</td>
-                            <td>Đèn trang trí</td>
-                            <td>10</td>
-                            <td>9.700.000 VND</td>
-                        </tr>
-                        <tr>
-                            <td>den1</td>
-                            <td>Đèn trang trí vách cao cấp NETVIET NV 8825</td>
-                            <td>780.000</td>
-                            <td>Đèn trang trí</td>
-                            <td>5</td>
-                            <td>3.900.000 VND</td>
-                        </tr>
-                        <tr>
-                            <td>ban4</td>
-                            <td>Bàn gỗ dài</td>
-                            <td>189.000</td>
-                            <td>Bàn gỗ</td>
-                            <td>9</td>
-                            <td>1.701.000 VND</td>
-                        </tr>
-                        <tr>
-                            <td>den4</td>
-                            <td>Đèn trang trí vách Netviet NV 8205/1</td>
-                            <td>590.000</td>
-                            <td>Đèn trang trí</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>giuong1</td>
-                            <td>Giường Bellasofa BS701</td>
-                            <td>11.000.000</td>
-                            <td>Giường ngủ</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>giuong2</td>
-                            <td>Giường ngủ FURNILAND - Jangin Haim (1.8m)</td>
-                            <td>5.400.000</td>
-                            <td>Giường ngủ</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>giuong3</td>
-                            <td>Giường ngủ FURNILAND - Jangin Christine (1m8)</td>
-                            <td>12.000.000</td>
-                            <td>Giường ngủ</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>giuong4</td>
-                            <td>Giường Bellasofa B1239</td>
-                            <td>9.000.000</td>
-                            <td>Giường ngủ</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>ke1</td>
-                            <td>Kệ sách gỗ 4 tầng 40</td>
-                            <td>510.000</td>
-                            <td>Kệ sách</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>ke2</td>
-                            <td>Kệ sách BIG ONE VIETNAM SPR-1980DK</td>
-                            <td>460.000</td>
-                            <td>Kệ sách</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>ke3</td>
-                            <td>Kệ trang trí Rubik Modulo Home 1846</td>
-                            <td>1.100.000</td>
-                            <td>Kệ sách</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>ke4</td>
-                            <td>Giá sách treo Hurakids 2130-001</td>
-                            <td>598.000</td>
-                            <td>Kệ sách</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>phongtam1</td>
-                            <td>Thanh treo giấy vệ sinh</td>
-                            <td>150.000</td>
-                            <td>Phòng tắm</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>phongtam2</td>
-                            <td>Thanh sắt treo khăn</td>
-                            <td>109.000</td>
-                            <td>Phòng tắm</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>phongtam3</td>
-                            <td>Kệ chứa xà phòng</td>
-                            <td>190.000</td>
-                            <td>Phòng tắm</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>phongtam4</td>
-                            <td>Bóng đèn DTY</td>
-                            <td>80.000</td>
-                            <td>Phòng tắm</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>rem1</td>
-                            <td>Rèm cửa 01</td>
-                            <td>900.000</td>
-                            <td>Rèm cửa</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>rem2</td>
-                            <td>Rèm cửa 02</td>
-                            <td>890.000</td>
-                            <td>Rèm cửa</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>rem3</td>
-                            <td>Rèm cửa 03</td>
-                            <td>750.000</td>
-                            <td>Rèm cửa</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>rem4</td>
-                            <td>Rèm cửa 04</td>
-                            <td>950.000</td>
-                            <td>Rèm cửa</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>sofa1</td>
-                            <td>Ghế sofa kem</td>
-                            <td>2.500.000</td>
-                            <td>Ghế sofa</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>sofa2</td>
-                            <td>Sofa cafe</td>
-                            <td>2.300.000</td>
-                            <td>Ghế sofa</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>sofa3</td>
-                            <td>Ghế sofa đơn êm ái</td>
-                            <td>2.600.000</td>
-                            <td>Ghế sofa</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>sofa4</td>
-                            <td>Sofa đơn SFD18</td>
-                            <td>5.100.000</td>
-                            <td>Ghế sofa</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>tu1</td>
-                            <td>Tủ quần áo BIG ONE VIETNAM WVR-1855L</td>
-                            <td>4.000.000</td>
-                            <td>Tủ quần áo</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>tu2</td>
-                            <td>Tủ áo B1241K</td>
-                            <td>5.400.000</td>
-                            <td>Tủ quần áo</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>tu3</td>
-                            <td>Tủ Áo Bellasofa B1239</td>
-                            <td>3.790.000</td>
-                            <td>Tủ quần áo</td>
-                            <td>0</td>
-                            <td>0 VND</td>
-                        </tr>
-                        <tr>
-                            <td>tu4</td>
-                            <td>Tủ áo B1238</td>
-                            <td>5.100.000</td>
-                            <td>Tủ quần áo</td>
-                            <td>0</td>
-                            <td>0 VND</td>
+                            <td>
+                                <a href="./orderlist.php" class="btn btn-danger btn-sm">Xem đơn hàng</a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -455,7 +151,7 @@
                     <label for="toDate-Users" class="filter-label">Đến ngày:</label>
                     <input type="date" class="filter-input" id="toDate-Users">
                 </div>
-                <button onclick="render_Revenue_User()" class="filter-button">Lọc</button>
+                <button id="filterUsersButton" class="filter-button">Lọc</button>
             </div>
 
             <div class="table-responsive-lg table-statistic">
@@ -476,43 +172,7 @@
                             <td>BookShopOnline@gmail.com</td>
                             <td>87,910,000 VND</td>
                             <td>
-                                <a href="./data_oder.html?id=5" class="btn btn-danger btn-sm">Xem đơn hàng</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Triệu Thanh Phú</td>
-                            <td>9123369598</td>
-                            <td>PetSuppliesCT@gmail.com</td>
-                            <td>63,000,000 VND</td>
-                            <td>
-                                <a href="./data_oder.html?id=1" class="btn btn-danger btn-sm">Xem đơn hàng</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Lê Thị Mai</td>
-                            <td>9613456789</td>
-                            <td>GreenLivingShop@gmail.com</td>
-                            <td>53,000,000 VND</td>
-                            <td>
-                                <a href="./data_oder.html?id=8" class="btn btn-danger btn-sm">Xem đơn hàng</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Quán Thiếu Anh</td>
-                            <td>7174378833</td>
-                            <td>FrenzyFlorists@gmail.com</td>
-                            <td>31,347,000 VND</td>
-                            <td>
-                                <a href="./data_oder.html?id=2" class="btn btn-danger btn-sm">Xem đơn hàng</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Phan Thị Hồng</td>
-                            <td>9432225589</td>
-                            <td>EcoHomeDesign@gmail.com</td>
-                            <td>18,560,000 VND</td>
-                            <td>
-                                <a href="./data_oder.html?id=6" class="btn btn-danger btn-sm">Xem đơn hàng</a>
+                                <a href="./orderlist.php?id=5" class="btn btn-danger btn-sm">Xem đơn hàng</a>
                             </td>
                         </tr>
                     </tbody>
@@ -537,7 +197,7 @@
                             <th scope="col">Giá tiền</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="lowStockBody">
                         <tr>
                             <td>giuong3</td>
                             <td>Giường ngủ FURNILAND - Jangin Christine (1m8)</td>
@@ -545,27 +205,7 @@
                             <td>4</td>
                             <td>12.000.000 VND</td>
                         </tr>
-                        <tr>
-                            <td>sofa3</td>
-                            <td>Ghế sofa đơn êm ái</td>
-                            <td>Ghế sofa</td>
-                            <td>2</td>
-                            <td>2.600.000 VND</td>
-                        </tr>
-                        <tr>
-                            <td>tu1</td>
-                            <td>Tủ quần áo BIG ONE VIETNAM WVR-1855L</td>
-                            <td>Tủ quần áo</td>
-                            <td>3</td>
-                            <td>4.000.000 VND</td>
-                        </tr>
-                        <tr>
-                            <td>tu4</td>
-                            <td>Tủ áo B1238</td>
-                            <td>Tủ quần áo</td>
-                            <td>1</td>
-                            <td>5.100.000 VND</td>
-                        </tr>
+
                     </tbody>
                 </table>
             </div>
@@ -575,11 +215,227 @@
     <script src="../../bootstrap-5.2.2-dist/js/bootstrap.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
     <script src="../../js/jquery.min.js"></script>
-    <script src="../../js/data.js"></script>
-    <script src="../../js/admin.js"></script>
-    <script src="../../js/account.js"></script>
-    <script src="../../js/statistic.js"></script>
-    <script src="../../js/checkSignInAdmin.js"></script>
+    <script>
+        function renderLowStockProducts() {
+            fetch('../controllers/ProductController.php?action=getLowStockProducts')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('lowStockBody');
+                    tbody.innerHTML = '';
+
+                    if (data.length === 0) {
+                        const row = document.createElement('tr');
+                        const cell = document.createElement('td');
+                        cell.setAttribute('colspan', '5');
+                        cell.classList.add('text-center');
+                        cell.textContent = 'Không có sản phẩm nào sắp hết hàng';
+                        row.appendChild(cell);
+                        tbody.appendChild(row);
+                        return;
+                    }
+
+                    data.forEach(product => {
+                        const row = document.createElement('tr');
+
+                        row.innerHTML = `
+                    <td>${product.id}</td>
+                    <td>${product.name}</td>
+                    <td>${product.category_name}</td>
+                    <td>${product.stock}</td>
+                    <td>${parseInt(product.price).toLocaleString('vi-VN')} VND</td>
+                `;
+
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading low stock products:', error);
+                });
+        }
+
+        // Gọi hàm khi trang tải
+        document.addEventListener('DOMContentLoaded', renderLowStockProducts);
+
+        document.getElementById('filterProductsButton').addEventListener('click', function() {
+            renderProductsTableFromServer();
+        });
+        renderProductsTableFromServer();
+
+        function renderProductsTableFromServer() {
+            // Lấy giá trị từ các trường input
+            const fromDate = document.getElementById('fromDate-Products').value;
+            const toDate = document.getElementById('toDate-Products').value;
+
+            // Tạo đối tượng chứa dữ liệu lọc
+            const formData = new FormData();
+            formData.append('fromDate', fromDate);
+            formData.append('toDate', toDate);
+            formData.append('action', 'topProducts'); // Thêm action vào formData
+
+            // Gọi API qua Fetch để lấy dữ liệu
+            fetch('../controllers/ProductController.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text()) // Đọc phản hồi dưới dạng văn bản
+                .then(text => {
+                    let data;
+                    try {
+                        // Thử chuyển đổi phản hồi sang JSON
+                        data = JSON.parse(text);
+                    } catch (error) {
+                        // Nếu không thể parse thành JSON, thông báo lỗi
+                        console.error('Error parsing JSON:', error);
+                        alert('Lỗi: Không nhận được dữ liệu hợp lệ từ server. Phản hồi: ' + text);
+                        return;
+                    }
+
+                    // Xử lý kết quả trả về từ controller
+                    if (data.status === 'success') {
+                        const products = data.data;
+                        renderProductsTable(products);
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Đã có lỗi xảy ra.');
+                });
+        }
+
+        function renderProductsTable(products) {
+            const tableBody = document.getElementById('table-product-revenue').getElementsByTagName('tbody')[0];
+            console.log(tableBody);
+            // Xóa dữ liệu cũ
+            tableBody.innerHTML = '';
+
+            // Lặp qua danh sách sản phẩm và tạo các dòng trong bảng
+            products.forEach(product => {
+                const row = document.createElement('tr');
+
+                // Tạo các ô dữ liệu
+                const cells = [
+                    product.id,
+                    product.name,
+                    product.price,
+                    product.category_name,
+                    product.total_sold,
+                    product.total_revenue.toLocaleString('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                    }) // Định dạng total_revenue
+                ];
+
+                cells.forEach(cellData => {
+                    const cell = document.createElement('td');
+                    cell.textContent = cellData;
+                    row.appendChild(cell);
+                });
+
+                // Thêm cột "Xem đơn hàng"
+                const viewOrderCell = document.createElement('td');
+                const viewOrderLink = document.createElement('a');
+                viewOrderLink.href = `./orderlist.php?product_id=${product.id}`; // Link đến trang xem đơn hàng
+                viewOrderLink.classList.add('btn', 'btn-danger', 'btn-sm');
+                viewOrderLink.textContent = 'Xem đơn hàng';
+                viewOrderCell.appendChild(viewOrderLink);
+                row.appendChild(viewOrderCell);
+
+                // Thêm dòng vào bảng
+                tableBody.appendChild(row);
+            });
+        }
+
+        document.getElementById('filterUsersButton').addEventListener('click', function() {
+            renderUsersTableFromServer();
+        });
+        renderUsersTableFromServer();
+
+        function renderUsersTableFromServer() {
+            // Lấy giá trị từ các trường input
+            const fromDate = document.getElementById('fromDate-Users').value;
+            const toDate = document.getElementById('toDate-Users').value;
+
+            // Tạo đối tượng chứa dữ liệu lọc
+            const formData = new FormData();
+            formData.append('fromDate', fromDate);
+            formData.append('toDate', toDate);
+            formData.append('action', 'topSpendingUsers'); // Thêm action vào formData
+
+            // Gọi API qua Fetch để lấy dữ liệu
+            fetch('../controllers/UserController.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text()) // Đọc phản hồi dưới dạng văn bản
+                .then(text => {
+                    let data;
+                    try {
+                        // Thử chuyển đổi phản hồi sang JSON
+                        data = JSON.parse(text);
+                    } catch (error) {
+                        // Nếu không thể parse thành JSON, thông báo lỗi
+                        console.error('Error parsing JSON:', error);
+                        alert('Lỗi: Không nhận được dữ liệu hợp lệ từ server. Phản hồi: ' + text);
+                        return;
+                    }
+
+                    // Xử lý kết quả trả về từ controller
+                    if (data.status === 'success') {
+                        const users = data.data;
+                        renderUsersTable(users);
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Đã có lỗi xảy ra.');
+                });
+        }
+
+        function renderUsersTable(users) {
+            const tableBody = document.getElementById('table-users-revenue').getElementsByTagName('tbody')[0];
+
+            // Xóa dữ liệu cũ
+            tableBody.innerHTML = '';
+
+            // Lặp qua danh sách khách hàng và tạo các dòng trong bảng
+            users.forEach(user => {
+                const row = document.createElement('tr');
+
+                // Tạo các ô dữ liệu
+                const cells = [
+                    user.fullname,
+                    user.phone,
+                    user.email,
+                    user.total_revenue.toLocaleString('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                    })
+                ];
+
+                cells.forEach(cellData => {
+                    const cell = document.createElement('td');
+                    cell.textContent = cellData;
+                    row.appendChild(cell);
+                });
+
+                // Thêm cột "Xem đơn hàng"
+                const viewOrderCell = document.createElement('td');
+                const viewOrderLink = document.createElement('a');
+                viewOrderLink.href = `./orderlist.php?user_id=${user.id}`; // Link đến trang xem đơn hàng
+                viewOrderLink.classList.add('btn', 'btn-danger', 'btn-sm');
+                viewOrderLink.textContent = 'Xem đơn hàng';
+                viewOrderCell.appendChild(viewOrderLink);
+                row.appendChild(viewOrderCell);
+
+                // Thêm dòng vào bảng
+                tableBody.appendChild(row);
+            });
+        }
+    </script>
 </body>
 
 </html>

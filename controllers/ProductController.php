@@ -107,8 +107,16 @@ class ProductController
     {
         // Lấy danh sách sản phẩm từ model
         $products = $this->productModel->getAllProducts();
-        $perPage = 10;  // Số lượng sản phẩm mỗi trang
+        $perPage = 9;
         $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+        // Lọc theo key (từ khóa tìm kiếm)
+        if (isset($_GET['key']) && $_GET['key'] !== '') {
+            $keyword = strtolower(trim($_GET['key']));
+            $products = array_filter($products, function ($product) use ($keyword) {
+                return stripos($product['name'], $keyword) !== false;
+            });
+        }
 
         // Lọc theo category
         if (isset($_GET['category']) && $_GET['category'] !== 'all') {
@@ -177,6 +185,45 @@ class ProductController
         ]);
     }
 
+    public function showTopSellingProducts()
+    {
+        try {
+            // Lấy dữ liệu từ form lọc ngày (nếu có)
+            $fromDate = isset($_POST['fromDate']) ? $_POST['fromDate'] : null;
+            $toDate = isset($_POST['toDate']) ? $_POST['toDate'] : null;
+            $limit = isset($_POST['limit']) ? $_POST['limit'] : 5;  // Mặc định là 10 sản phẩm top selling
+
+            // Kiểm tra và validate dữ liệu nhập
+            if (!is_numeric($limit) || $limit <= 0) {
+                throw new Exception("Limit phải là một số dương");
+            }
+
+            // Tạo đối tượng model (giả sử bạn đã có mô hình Product)
+            $productModel = new ProductModel();
+
+            // Lấy danh sách sản phẩm top selling
+            $topSellingProducts = $productModel->getTopSellingProducts($limit, $fromDate, $toDate);
+
+            // Kiểm tra nếu không có sản phẩm nào
+            if (empty($topSellingProducts)) {
+                throw new Exception("Không có sản phẩm nào được bán");
+            }
+
+            // Trả về dữ liệu dưới dạng JSON
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'success',
+                'data' => $topSellingProducts
+            ]);
+        } catch (Exception $e) {
+            // Xử lý lỗi, trả về thông báo lỗi dưới dạng JSON
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
 
     public function getProductById($id)
     {
@@ -189,6 +236,9 @@ class ProductController
                 $product['category_name'] = $this->categoryModel->getCategoryNameById($product['category_id']);
                 $product['brand_name'] = $this->brandModel->getBrandNameById($product['brand_id']);
 
+                // Lọc HTML trong description để đảm bảo an toàn
+                $product['description'] = $this->sanitizeHTML($product['description']);
+
                 header('Content-Type: application/json');
                 echo json_encode($product);
             } else {
@@ -197,11 +247,46 @@ class ProductController
                 echo json_encode(['error' => 'Product not found']);
             }
         } catch (Exception $e) {
-            // Nếu có lỗi trong quá trình xử lý, trả về lỗi chi tiết
+            // Nếu có lỗi trong quá trình xử lý, echo ra lỗi chi tiết từ exception
+            echo "Exception: " . $e->getMessage();  // Echo thông báo lỗi của exception
             header('Content-Type: application/json');
             echo json_encode(['error' => 'Lỗi hệ thống: ' . $e->getMessage()]);
         }
     }
+
+    // Hàm lọc HTML an toàn, chỉ cho phép các thẻ HTML an toàn
+    private function sanitizeHTML($html)
+    {
+        // Lọc HTML để chỉ cho phép các thẻ an toàn
+        $allowedTags = '<div><p><b><i><u><a><img><ul><ol><li><br><strong>'; // Các thẻ được phép
+        return strip_tags($html, $allowedTags);
+    }
+
+
+    public function getProductById1($id)
+    {
+        // Lấy thông tin sản phẩm từ model theo ID
+        try {
+            $product = $this->productModel->getProductById($id);
+
+            if ($product) {
+                // Thêm tên category và brand vào sản phẩm
+                $product['category_name'] = $this->categoryModel->getCategoryNameById($product['category_id']);
+                $product['brand_name'] = $this->brandModel->getBrandNameById($product['brand_id']);
+
+                // Trả về sản phẩm thay vì echo trực tiếp
+                return $product;
+            } else {
+                // Nếu sản phẩm không tồn tại, trả về lỗi
+                return null;  // Trả về null nếu không tìm thấy sản phẩm
+            }
+        } catch (Exception $e) {
+            // Nếu có lỗi trong quá trình xử lý, trả về lỗi chi tiết
+            return ['error' => 'Lỗi hệ thống: ' . $e->getMessage()];
+        }
+    }
+
+
 
     public function addProduct()
     {
@@ -355,14 +440,18 @@ class ProductController
 
             $id = $_POST['id'];
 
-            // Kiểm tra xem sản phẩm có nằm trong order item không
+            // Nếu sản phẩm nằm trong đơn hàng → chỉ ẩn
             if ($this->productModel->isProductInOrderItem($id)) {
-                throw new Exception("Sản phẩm đang nằm trong đơn hàng và không thể xóa.");
+                $this->productModel->hideProduct($id);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Sản phẩm đã được bán. Đã chuyển sang trạng thái ẩn.'
+                ]);
+                return;
             }
 
-            $result = $this->productModel->deleteProduct($id);
-
-            if ($result) {
+            // Nếu không, xóa luôn
+            if ($this->productModel->deleteProduct($id)) {
                 echo json_encode(['success' => true]);
             } else {
                 throw new Exception("Không thể xóa sản phẩm.");
@@ -372,11 +461,56 @@ class ProductController
         }
     }
 
+    public function unhideProduct()
+    {
+        try {
+            if (!isset($_POST['id'])) {
+                throw new Exception("Thiếu ID sản phẩm.");
+            }
+
+            $id = $_POST['id'];
+            $result = $this->productModel->setProductHide($id, 0); // đặt is_hide = 0
+
+            if ($result) {
+                echo json_encode(['success' => true]);
+            } else {
+                throw new Exception("Không thể mở bán sản phẩm.");
+            }
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function checkProductSold($productId)
+    {
+        // Kiểm tra sản phẩm đã được bán chưa (có nằm trong đơn hàng nào chưa)
+        $isSold = $this->productModel->isProductSold($productId);
+
+        header('Content-Type: application/json');
+        echo json_encode(['sold' => $isSold]);  // Sửa từ 'isSold' thành 'sold'
+    }
+
 
     public function generateNewId()
     {
         $code = $this->productModel->generateNewId();
         echo json_encode(['code' => $code]);
+    }
+
+    public function hideProduct($productId)
+    {
+        if ($this->productModel->hideProduct($productId)) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Không thể ẩn sản phẩm']);
+        }
+    }
+
+    public function getLowStockProducts()
+    {
+        header('Content-Type: application/json');
+        $lowStockProducts = $this->productModel->getLowStockProducts();
+        echo json_encode($lowStockProducts);
     }
 }
 
@@ -388,13 +522,21 @@ if (isset($_GET['action'])) {
             $controller->listProducts();
             break;
         case 'getProductById':
-            // Lấy ID từ query string và gọi hàm getProductById
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $controller->getProductById($id);
             break;
+        case 'checkProductSold':
+            if (isset($_GET['id'])) {
+                $controller->checkProductSold((int)$_GET['id']);
+            } else {
+                echo json_encode(['error' => 'Missing product ID']);
+            }
+            break;
         case 'generateNewId':
-            // Gọi phương thức generateNewId để tạo ID mới
             $controller->generateNewId();
+            break;
+        case 'getLowStockProducts': // ✅ Thêm mới
+            $controller->getLowStockProducts();
             break;
         default:
             header('Content-Type: application/json');
@@ -410,7 +552,6 @@ if (isset($_GET['action'])) {
             $controller->addProduct();
             break;
         case 'updateProduct':
-            // Kiểm tra nếu có ID trong POST để xác định việc cập nhật
             if (isset($_POST['id'])) {
                 $id = $_POST['id'];
                 $controller->updateProduct($id);
@@ -424,6 +565,23 @@ if (isset($_GET['action'])) {
             } else {
                 echo json_encode(['error' => 'Missing product ID for delete']);
             }
+            break;
+        case 'unhideProduct':
+            if (isset($_POST['id'])) {
+                $controller->unhideProduct();
+            } else {
+                echo json_encode(['error' => 'Missing product ID for unhide']);
+            }
+            break;
+        case 'hideProduct':
+            if (isset($_POST['id'])) {
+                $controller->hideProduct($_POST['id']);
+            } else {
+                echo json_encode(['error' => 'Missing product ID for hide']);
+            }
+            break;
+        case 'topProducts': // Thêm case xử lý top selling cho POST nếu cần
+            $controller->showTopSellingProducts();
             break;
         default:
             echo json_encode(['error' => 'Invalid action']);

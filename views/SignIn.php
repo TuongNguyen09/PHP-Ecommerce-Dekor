@@ -13,7 +13,7 @@ if (session_status() == PHP_SESSION_NONE) {
     <link rel="stylesheet" href="../assets/fontawesome-free-6.2.0-web/css/all.css">
     <link rel="stylesheet" href="../assets/bootstrap-5.2.2-dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/font_Roboto/Roboto-Bold.ttf">
-    <link rel="stylesheet" href="../assets/css/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="../assets/themify-icons/themify-icons.css">
     <link rel="stylesheet" href="../assets/css/product.css">
     <script src="../assets/js/jquery.min.js"></script>
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -55,7 +55,7 @@ if (session_status() == PHP_SESSION_NONE) {
                                         </div>
                                         <div class="input-form">
                                             <p>Bạn Chưa Có Tài Khoản?
-                                                <a href="../../SanPham/html/Dangky.html">Đăng Ký</a>
+                                                <a href="./SignUp.php">Đăng Ký</a>
                                             </p>
                                         </div>
                                     </form>

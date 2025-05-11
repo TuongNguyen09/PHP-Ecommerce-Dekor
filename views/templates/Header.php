@@ -13,8 +13,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="../../Index.html">
-                <img src="./assets/imgs/logo.webp">
+            <a class="navbar-brand" href="/php-ecommerce-dekor/index.php">
+                <img src="/php-ecommerce-dekor/assets/imgs/logo.webp">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -22,83 +22,66 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="width: 28em">
+                <ul class="navbar-nav mb-2 mb-lg-0" style="width: 28em">
                     <li class="nav-item">
-                        <a class="nav-link " href="../../Index.html">Trang chủ</a>
+                        <a class="nav-link " href="/php-ecommerce-dekor/Index.php">Trang chủ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../../header/GioiThieu.html">Giới thiệu</a>
+                        <a class="nav-link" href="/php-ecommerce-dekor/views/About.php">Giới thiệu</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="../../SanPham/html/category/product.html"
+                        <a class="nav-link dropdown-toggle" href="/php-ecommerce-dekor/views/productpage.php"
                             id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                             Sản Phẩm
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="javascript:void(0)">Tất cả sản phẩm</a></li>
+                            <li><a class="dropdown-item" href="/php-ecommerce-dekor/views/productpage.php?page=1">Tất cả sản phẩm</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="javascript:void(0)">Bàn Gỗ</a></li>
+                            <li><a class="dropdown-item" href="/php-ecommerce-dekor/views/productpage.php?category=Bàn+gỗ&page=1">Bàn gỗ</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="javascript:void(0)">Kệ Sách</a></li>
+                            <li><a class="dropdown-item" href="/php-ecommerce-dekor/views/productpage.php?category=Kệ+sách&page=1">Kệ sách</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="javascript:void(0)">Rèm Cửa</a></li>
+                            <li><a class="dropdown-item" href="/php-ecommerce-dekor/views/productpage.php?category=Rèm+cửa&page=1">Rèm cửa</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="javascript:void(0)">Ghế Sofa</a></li>
+                            <li><a class="dropdown-item" href="/php-ecommerce-dekor/views/productpage.php?category=Ghế+sofa&page=1">Ghế sofa</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="javascript:void(0)">Tủ Quần Áo</a></li>
+                            <li><a class="dropdown-item" href="/php-ecommerce-dekor/views/productpage.php?category=Tủ+quần+áo&page=1">Tủ quần áo</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="javascript:void(0)">Giường Ngủ</a></li>
+                            <li><a class="dropdown-item" href="/php-ecommerce-dekor/views/productpage.php?category=Giường+ngủ&page=1">Giường ngủ</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="javascript:void(0)">Phòng Tắm</a></li>
+                            <li><a class="dropdown-item" href="/php-ecommerce-dekor/views/productpage.php?category=Phòng+tắm&page=1">Phòng tắm</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="javascript:void(0)">Đèn trang trí</a></li>
+                            <li><a class="dropdown-item" href="/php-ecommerce-dekor/views/productpage.php?category=Đèn+trang+trí&page=1">Đèn trang trí</a></li>
                         </ul>
+
+
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link " href="../../header/TinTuc.html">Tin tức</a>
+                        <a class="nav-link " href="/php-ecommerce-dekor/views/New.php">Tin tức</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link " href="../../header/LienHe.html">Liên Hệ</a>
+                        <a class="nav-link " href="/php-ecommerce-dekor/views/Contact.php">Liên Hệ</a>
                     </li>
                 </ul>
                 <form class="d-flex display: block">
                     <input class="form-control search-input" type="text" placeholder="Tìm kiếm" aria-label="Search"
                         id="myInput" onkeyup="myFunction()">
-                    <ul id="myUL" class="list-group searchInput mt-1">
-                        <li><a href="../../SanPham/html/category/detail_item/Ban/ban2.html"
-                                class="list-group-item list-group-item-action">bàn GTY 091</a></li>
-                        <li><a href="../../SanPham/html/category/detail_item/tu_quan_ao/tu2.html"
-                                class="list-group-item list-group-item-action">Tủ áo B1241K</a></li>
-
-                        <li><a href="../../SanPham/html/category/detail_item/ke_sach/ke1.html"
-                                class="list-group-item list-group-item-action">Kệ sách gỗ 4 tầng 40</a></li>
-                        <li><a href="../../SanPham/html/category/detail_item/rem_cua/rem1.html"
-                                class="list-group-item list-group-item-action">Rèm Cửa 01</a></li>
-
-                        <li><a href="../../SanPham/html/category/detail_item/phong_tam/tam1.html"
-                                class="list-group-item list-group-item-action">Thanh treo giấy vệ sinh</a></li>
-                        <li><a href="../../SanPham/html/category/detail_item/sofa/sofa2.html"
-                                class="list-group-item list-group-item-action">Sofa Cafe</a></li>
-                        <li><a href="../../SanPham/html/category/detail_item/giuong_ngu/giuong4.html"
-                                class="list-group-item list-group-item-action">Giường Bellasofa B1239</a></li>
-
-                    </ul>
 
                     <button class="btn btn-primary search-btn" type="button" onclick="redirectToProductPage()"><span
                             class="ti-search"></span></button>
@@ -109,14 +92,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
                 if (isset($_SESSION['userId'])) {
 
                     echo '
-    <div class="icon-user">
+    <div class="icon-user" style="margin: 0 10px 0 20px;">
         <li class="nav-item dropdown">
             <a class="fas fa-user nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown"></a>
             <ul class="dropdown-menu">
-                <a href="' . '' . '/SanPham/html/accountInfo.html" class="dropdown-item">
+                <a href="' . '' . '/php-ecommerce-dekor/views/MyInfoPage.php" class="dropdown-item">
                     <li>Tài khoản</li>
                 </a>
-                <a href="' . '' . '/SanPham/html/user_order.html" class="dropdown-item">
+                <a href="' . '' . '/php-ecommerce-dekor/views/OrderHistoryPage.php" class="dropdown-item">
                     <li>Đơn mua</li>
                 </a>
                 <a href="?action=logout" class="dropdown-item">
@@ -133,11 +116,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
             <a class="fas fa-user nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown"></a>
             <ul class="dropdown-menu">
                 <li>
-                    <a href="./SanPham/html/Dangnhap.html" class="dropdown-item">Đăng Nhập</a>
+                    <a href="/php-ecommerce-dekor/views/SignIn.php" class="dropdown-item">Đăng Nhập</a>
                 </li>
                 <li class="dropdown-divider"></li>
                 <li>
-                    <a href="./SanPham/html/Dangky.html" class="dropdown-item">Đăng Ký</a>
+                    <a href="/php-ecommerce-dekor/views/SignUp.php" class="dropdown-item">Đăng Ký</a>
                 </li>
             </ul>
         </li>
@@ -145,7 +128,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
                 }
                 ?>
 
-                <a href="./cart.html" title="Mua hàng" class="cart">
+                <a href="<?php echo isset($_SESSION['userId']) ? '/php-ecommerce-dekor/views/CartPage.php' : 'javascript:void(0);' ?>"
+                    title="Mua hàng" class="cart"
+                    onclick="<?php if (!isset($_SESSION['userId'])) echo "alert('Vui lòng đăng nhập để mua hàng.');" ?>">
                     <li class="fas fa-cart-shopping"><span>0</span></li>
                 </a>
             </div>
@@ -156,7 +141,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 <script>
     window.addEventListener('load', () => {
         // Gửi yêu cầu tới server để lấy thông tin giỏ hàng
-        fetch('../controllers/CartController.php?action=getCartTotalQuantity') // Địa chỉ API để lấy tổng số lượng giỏ hàng
+        fetch('/php-ecommerce-dekor/controllers/CartController.php?action=getCartTotalQuantity') // Địa chỉ API để lấy tổng số lượng giỏ hàng
             .then(response => response.json())
             .then(data => {
                 // Kiểm tra nếu có dữ liệu từ server
@@ -166,5 +151,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
                 }
             })
             .catch(error => console.error('Lỗi:', error));
+    });
+
+    document.querySelector(".search-btn").addEventListener("click", function() {
+        const keyword = document.getElementById("myInput").value.trim();
+        if (keyword !== "") {
+            // Encode từ khóa rồi chuyển hướng
+            const encodedKeyword = encodeURIComponent(keyword);
+            window.location.href = "/php-ecommerce-dekor/views/productpage.php?key=" + encodedKeyword + "&page=1";
+        }
     });
 </script>

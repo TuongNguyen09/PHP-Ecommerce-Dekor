@@ -1,15 +1,16 @@
 <?php
 require_once '../config/db.php';
-
+require_once 'OrderItemModel.php';
 class OrderModel
 {
     private $conn;
     private $table = 'orders';
-
+    private $orderItemModel;
     public function __construct()
     {
         $database = new Database();
         $this->conn = $database->getConnection();
+        $this->orderItemModel = new OrderItemModel($this->conn); // Truyền connection
     }
 
     // Lấy tất cả đơn hàng
@@ -34,18 +35,33 @@ class OrderModel
     // Lấy danh sách đơn hàng theo user_id
     public function getOrdersByUserId($userId)
     {
-        $query = "SELECT * FROM " . $this->table . " WHERE user_id = :user_id";
+        // Truy vấn JOIN giữa orders, order_item và product
+        $query = "
+        SELECT o.*, 
+               oi.product_id, 
+               oi.quantity, 
+               p.price, 
+               p.name AS product_name
+        FROM " . $this->table . " o
+        LEFT JOIN order_item oi ON o.id = oi.order_id
+        LEFT JOIN product p ON oi.product_id = p.id
+        WHERE o.user_id = :user_id
+    ";
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $userId);
         $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
 
     // Lấy chi tiết sản phẩm trong đơn hàng
     public function getOrderItems($orderId)
     {
         $query = "SELECT oi.*, p.name, p.image, p.price
-                  FROM order_items oi
+                  FROM order_item oi
                   JOIN product p ON oi.product_id = p.id
                   WHERE oi.order_id = :order_id";
         $stmt = $this->conn->prepare($query);
@@ -53,6 +69,7 @@ class OrderModel
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     // Tạo đơn hàng mới
     public function createOrder($userId, $totalAmount, $address, $status)
@@ -125,7 +142,7 @@ class OrderModel
     // Thêm sản phẩm vào đơn hàng
     public function addOrderItem($orderId, $productId, $quantity, $price)
     {
-        $query = "INSERT INTO order_items (order_id, product_id, quantity, price)
+        $query = "INSERT INTO order_item (order_id, product_id, quantity, price)
                   VALUES (:order_id, :product_id, :quantity, :price)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':order_id', $orderId);
@@ -138,12 +155,58 @@ class OrderModel
     // Cập nhật trạng thái đơn hàng
     public function updateOrderStatus($orderId, $status)
     {
-        $query = "UPDATE " . $this->table . " SET status = :status WHERE id = :order_id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':status', $status);
-        $stmt->bindParam(':order_id', $orderId);
-        return $stmt->execute();
+        try {
+            // Nếu trạng thái là 'Đã xác nhận', trừ stock của các sản phẩm trong order
+            if ($status === 'Đã xác nhận') {
+                // Lấy danh sách các sản phẩm trong order_item
+                $orderItems = $this->orderItemModel->getItemsByOrderId($orderId);
+
+                // Cập nhật stock của từng sản phẩm
+                foreach ($orderItems as $item) {
+                    $productId = $item['product_id'];
+                    $quantity = $item['quantity'];
+
+                    // Trừ số lượng sản phẩm trong kho
+                    $updateStockQuery = "UPDATE product SET stock = stock - :quantity WHERE id = :product_id";
+                    $stmt = $this->conn->prepare($updateStockQuery);
+                    $stmt->bindParam(':quantity', $quantity);
+                    $stmt->bindParam(':product_id', $productId);
+                    $stmt->execute();
+                }
+            }
+
+            // Cập nhật trạng thái đơn hàng
+            if ($status === 'Đã giao thành công') {
+                $query = "UPDATE " . $this->table . " 
+                      SET status = :status, delivery_date = NOW() 
+                      WHERE id = :order_id";
+            } else {
+                $query = "UPDATE " . $this->table . " 
+                      SET status = :status 
+                      WHERE id = :order_id";
+            }
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':status', $status);
+            $stmt->bindParam(':order_id', $orderId);
+
+            return $stmt->execute();
+        } catch (Exception $e) {
+            // Xử lý lỗi nếu có
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
     }
+
+
+    public function cancelOrderById($orderId)
+    {
+        $sql = "UPDATE orders SET status = 'Đã hủy' WHERE id = ?";
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([$orderId]);
+    }
+
+
 
     // Xoá đơn hàng
     public function deleteOrder($orderId)

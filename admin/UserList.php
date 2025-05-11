@@ -1,3 +1,17 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['adminId'])) {
+    echo "<script>
+        alert('Vui lòng đăng nhập với quyền admin');
+        window.location.href = 'signinadmin.php';
+    </script>";
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,7 +23,7 @@
     <link rel="stylesheet" href="../assets/fontawesome-free-6.2.0-web/css/all.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
     <link rel="stylesheet" href="../assets/font_Roboto/Roboto-Bold.ttf">
-    <link rel="stylesheet" href="../assets/css/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="../assets/themify-icons/themify-icons.css">
     <script src="../assets/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="../assets/css/admin.css">
     <link rel="stylesheet" href="../assets/css/product.css">
@@ -209,7 +223,7 @@
                     </div>
                 </div>
 
-                <div class="form-row">
+                <!-- <div class="form-row">
                     <label for="editAddress">Địa chỉ:</label>
                     <div class="input-container input-wrapper">
                         <input type="text" id="editAddress" required>
@@ -218,7 +232,7 @@
                         <div id="wardDropdown" class="dropdown"></div>
                         <small class="error-message" id="editAddressError"></small>
                     </div>
-                </div>
+                </div> -->
 
                 <div class="form-row">
                     <label for="editPhone">Số điện thoại:</label>
@@ -289,75 +303,77 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
     <script src="../../js/jquery.min.js"></script>
     <script>
-        // function openEditUserModal(userId) {
-        //     const users = JSON.parse(localStorage.getItem('users')) || [];
-        //     let user = null;
+        function checkValidateUserForm() {
+            let isValid = true;
 
-        //     if (userId) {
-        //         user = users.find(u => u.id === userId);
-        //     }
+            // Lấy giá trị
+            const username = document.getElementById('editUsername').value.trim();
+            const fullname = document.getElementById('editFullName').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            const birthday = document.getElementById('editBirthday').value;
+            const gender = document.querySelector('input[name="editGender"]:checked');
+            const password = document.getElementById('editPassword').value.trim();
+            const confirmPassword = document.getElementById('editConfirmPassword').value.trim();
 
-        //     if (user) {
-        //         // Điền thông tin vào các trường trong form nếu có user
-        //         document.querySelector('#editUserId').value = user.id;
-        //         document.querySelector('#editUsername').value = user.account;
-        //         document.querySelector('#editFullName').value = user.name;
-        //         document.querySelector('#editAddress').value = user.address;
-        //         document.querySelector('#editPhone').value = user.phone;
-        //         document.querySelector('#editEmail').value = user.account;
+            // Reset lỗi
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
 
-        //         // Thiết lập giới tính
-        //         document.querySelector(`input[name="editGender"][value="${user.gender}"]`).checked = true;
+            // Tài khoản
+            if (!username) {
+                document.getElementById('editUsernameError').textContent = 'Vui lòng nhập tài khoản';
+                isValid = false;
+            }
 
-        //         // Xử lý ngày sinh
-        //         if (user.birthdate) {
-        //             const date = new Date(user.birthdate); // Chuyển chuỗi thành Date
-        //             const formattedDate = date.toISOString().split('T')[0]; // Chuyển sang 'yyyy-mm-dd'
-        //             document.querySelector('#editBirthday').value = formattedDate; // Điền vào input ngày sinh
-        //         } else {
-        //             document.querySelector('#editBirthday').value = ''; // Nếu không có ngày sinh
-        //         }
+            // Họ tên
+            if (!fullname) {
+                document.getElementById('editFullNameError').textContent = 'Vui lòng nhập họ tên';
+                isValid = false;
+            }
 
-        //         document.getElementById('labelPassword').style.display = 'none';
-        //         document.getElementById('labelconfirmPassword').style.display = 'none';
-        //         // Thiết lập hành động lưu thay đổi
-        //         document.getElementById('saveChangesBtn').onclick = function() {
-        //             saveUserChanges(userId);
-        //         };
-        //     } else {
-        //         // Nếu không có userId, form sẽ mở để thêm người dùng mới
-        //         document.querySelector('#editUserId').value = ''; // Không có ID cho người dùng mới
-        //         document.querySelector('#editUsername').value = '';
-        //         document.querySelector('#editFullName').value = '';
-        //         document.querySelector('#editAddress').value = '';
-        //         document.querySelector('#editPhone').value = '';
-        //         document.querySelector('#editEmail').value = '';
-        //         document.querySelector('input[name="editGender"]').checked = false;
-        //         document.querySelector('#editBirthday').value = '';
+            // Số điện thoại
+            if (!phone || !/^\d{10,11}$/.test(phone)) {
+                document.getElementById('editPhoneError').textContent = 'Số điện thoại không hợp lệ';
+                isValid = false;
+            }
 
-        //         // Hiển thị trường password và confirm password khi thêm mới người dùng
-        //         document.getElementById('labelPassword').style.display = 'flex';
-        //         document.getElementById('labelconfirmPassword').style.display = 'flex';
-        //         document.getElementById('editPassword').style.display = 'flex';
-        //         document.getElementById('editConfirmPassword').style.display = 'flex';
+            // Email
+            if (!email || !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+                document.getElementById('editEmailError').textContent = 'Email không hợp lệ';
+                isValid = false;
+            }
 
-        //         // Thiết lập hành động lưu cho người dùng mới
-        //         document.getElementById('saveChangesBtn').onclick = function() {
-        //             saveUserChanges(); // Không cần truyền userId, vì đây là thêm mới
-        //         };
-        //     }
+            // Giới tính
+            if (!gender) {
+                document.getElementById('editGenderError').textContent = 'Vui lòng chọn giới tính';
+                isValid = false;
+            }
 
-        //     // Hiển thị modal overlay chỉnh sửa
-        //     document.querySelector('#editUserModal').style.display = 'block';
-        //     setupAddressDropdown("editAddress");
-        // }
+            // Ngày sinh
+            if (!birthday) {
+                document.getElementById('editBirthdayError').textContent = 'Vui lòng chọn ngày sinh';
+                isValid = false;
+            }
 
-        // function closeEditUserModal() {
-        //     document.querySelector('#editUserModal').style.display = 'none';
-        // }
+            // Mật khẩu
+            if (!password) {
+                document.getElementById('editPasswordError').textContent = 'Vui lòng nhập mật khẩu';
+                isValid = false;
+            } else if (password.length < 6) {
+                document.getElementById('editPasswordError').textContent = 'Mật khẩu ít nhất 6 ký tự';
+                isValid = false;
+            }
 
-        // Đóng modal user
-        // Đóng modal user
+            // Nhập lại mật khẩu
+            if (!confirmPassword || confirmPassword !== password) {
+                document.getElementById('editConfirmPasswordError').textContent = 'Mật khẩu không khớp';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+
         function closeEditUserModal() {
             document.getElementById('editUserModal').style.display = 'none';
         }
@@ -366,7 +382,7 @@
         function openEditUserModal(id = null) {
             // Reset lỗi
             const errorFields = [
-                'editUsernameError', 'editFullNameError', 'editAddressError',
+                'editUsernameError', 'editFullNameError',
                 'editPhoneError', 'editEmailError', 'editGenderError',
                 'editBirthdayError', 'editPasswordError', 'editConfirmPasswordError'
             ];
@@ -412,7 +428,7 @@
                 document.getElementById('editUserId').value = '';
                 document.getElementById('editUsername').value = '';
                 document.getElementById('editFullName').value = '';
-                document.getElementById('editAddress').value = '';
+                // document.getElementById('editAddress').value = '';
                 document.getElementById('editPhone').value = '';
                 document.getElementById('editEmail').value = '';
                 document.getElementById('editBirthday').value = '';
@@ -428,52 +444,40 @@
 
 
         document.getElementById('saveChangesBtn').addEventListener('click', () => {
+            // Kiểm tra validate trước
+            if (!checkValidateUserForm()) {
+                return; // Nếu không hợp lệ thì không gửi
+            }
+
             const id = document.getElementById('editUserId').value;
             const username = document.getElementById('editUsername').value.trim();
             const fullname = document.getElementById('editFullName').value.trim();
-            // const address = document.getElementById('editAddress').value.trim();
             const phone = document.getElementById('editPhone').value.trim();
             const email = document.getElementById('editEmail').value.trim();
-            const birthday = document.getElementById('editBirthday').value.trim(); // Ngày sinh
-            const gender = document.querySelector('input[name="editGender"]:checked')?.value || ''; // Giới tính
-            const password = document.getElementById('editPassword')?.value.trim(); // Mật khẩu
+            const birthday = document.getElementById('editBirthday').value.trim();
+            const gender = document.querySelector('input[name="editGender"]:checked')?.value || '';
+            const password = document.getElementById('editPassword').value.trim();
 
-            // Kiểm tra validate (có thể thêm kiểm tra mật khẩu ở đây)
-            if (!username || !fullname || !phone || !email || !id ) {
-                console.warn('Thiếu thông tin:');
-                if (!username) console.warn('- username trống');
-                if (!fullname) console.warn('- fullname trống');
-                if (!phone) console.warn('- phone trống');
-                if (!email) console.warn('- email trống');
-                if (id && !password) console.warn('- password trống khi đang update');
-                alert('Vui lòng điền đầy đủ thông tin');
-                return;
-            }
-
-
-            // Chuẩn bị dữ liệu gửi đi
             const formData = new FormData();
             formData.append('username', username);
             formData.append('fullname', fullname);
-            // formData.append('address', address); // Nếu cần thì bỏ comment
             formData.append('phone', phone);
             formData.append('email', email);
-            formData.append('birthday', birthday); // Gửi ngày sinh
-            formData.append('gender', gender); // Gửi giới tính
-            formData.append('password', password); // Gửi mật khẩu nếu có
+            formData.append('birthday', birthday);
+            formData.append('gender', gender);
+            formData.append('password', password);
 
-            // Nếu id có, là update, nếu không là create
             const action = id ? `update&id=${id}` : 'create';
 
             fetch(`../controllers/UserController.php?action=${action}`, {
                     method: 'POST',
                     body: formData
                 })
-                .then(res => res.text()) // ← Dùng .text() để đọc thô phản hồi
+                .then(res => res.text())
                 .then(text => {
-                    console.log('RAW RESPONSE FROM PHP:', text); // ← In ra console để kiểm tra
+                    console.log('RAW RESPONSE FROM PHP:', text);
                     try {
-                        const result = JSON.parse(text); // ← Thử parse JSON thủ công
+                        const result = JSON.parse(text);
                         if (result.status === 'success') {
                             alert('Lưu thành công!');
                             closeEditUserModal();
@@ -482,7 +486,7 @@
                             alert('Thất bại: ' + (result.message || 'Có lỗi xảy ra'));
                         }
                     } catch (e) {
-                        console.error('Phản hồi không phải JSON:', e, text); // ← Bắt lỗi JSON
+                        console.error('Phản hồi không phải JSON:', e, text);
                         alert('Phản hồi lỗi từ máy chủ:\n' + text);
                     }
                 })
@@ -491,8 +495,6 @@
                     alert('Gửi yêu cầu thất bại.');
                 });
         });
-
-
 
 
         // Gọi API lấy danh sách user từ server
@@ -517,27 +519,27 @@
                 .catch(error => console.error('Fetch error:', error));
         }
 
-        function renderUsers(users) {
-            const tbody = document.querySelector('#userTable');
-            tbody.innerHTML = '';
+        // function renderUsers(users) {
+        //     const tbody = document.querySelector('#userTable');
+        //     tbody.innerHTML = '';
 
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                row.id = `user-${user.id}`;
-                row.innerHTML = `
-        <td>${user.id}</td>
-        <td>${user.username}</td>
-        <td>${user.fullname}</td>
-        <td>${user.email}</td>
-        <td>${user.phone}</td>
-        <td>
-            <button class="btn btn-primary btn-sm edit" onclick="openEditUserModal(${user.id})"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-danger btn-sm delete" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i></button>
-        </td>
-        `;
-                tbody.appendChild(row);
-            });
-        }
+        //     users.forEach(user => {
+        //         const row = document.createElement('tr');
+        //         row.id = `user-${user.id}`;
+        //         row.innerHTML = `
+        // <td>${user.id}</td>
+        // <td>${user.username}</td>
+        // <td>${user.fullname}</td>
+        // <td>${user.email}</td>
+        // <td>${user.phone}</td>
+        // <td>
+        //     <button class="btn btn-primary btn-sm edit" onclick="openEditUserModal(${user.id})"><i class="fas fa-edit"></i></button>
+        //     <button class="btn btn-danger btn-sm delete" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i></button>
+        // </td>
+        // `;
+        //         tbody.appendChild(row);
+        //     });
+        // }
 
         function loadUsers() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -575,28 +577,109 @@
         }
 
 
-        function renderUsers(users) {
+        function renderUsers(paginatedUsers) {
             const tbody = document.querySelector('#userTable');
-            tbody.innerHTML = '';
+            if (!tbody) return;
 
-            users.forEach(user => {
+            tbody.innerHTML = ''; // Xóa nội dung cũ
+
+            paginatedUsers.forEach(user => {
                 const row = document.createElement('tr');
                 row.id = `user-${user.id}`;
+                const isBanned = user.is_banned == 1;
+
+                // Tô màu đỏ toàn bộ dòng nếu user bị khóa
+                const styleRed = isBanned ? 'color: red;' : '';
+
                 row.innerHTML = `
-        <td>${user.id}</td>
-        <td>${user.username}</td>
-        <td>${user.fullname}</td>
-        <td>${user.phone}</td>
-        <td>${user.email}</td>
-        <td>${user.gender === null ? 'Chưa xác định' : (user.gender === 'male' ? 'Nam' : 'Nữ')}</td>
-        <td>
-            <button class="btn btn-primary btn-sm edit" onclick="openEditUserModal(${user.id})"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-danger btn-sm delete" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i></button>
-        </td>
+            <td style="${user.is_banned == 1? 'color:red !important' : 'color:black!important'}">${user.id}</td>
+            <td style="${styleRed}">${user.fullname}</td>
+            <td style="${styleRed}">${user.username}</td>
+            <td style="${styleRed}">${user.phone}</td>
+            <td style="${styleRed}">${user.email}</td>
+            <td style="${styleRed}">${user.gender === 'male' ? 'Nam' : 'Nữ'}</td>
+            <td>
+                <button
+                    title="Khóa người dùng"
+                    class="btn btn-primary btn-sm ban"
+                    type="button"
+                    data-user-id="${user.id}"
+                    style="${user.is_banned == 1 ? 'display: none;' : 'display: inline-block;'}">
+                    <i class="fas fa-ban"></i>
+                </button>
+                <button
+                    title="Mở khóa người dùng"
+                    class="btn btn-primary btn-sm unban"
+                    type="button"
+                    data-user-id="${user.id}"
+                    style="${user.is_banned == 0 ? 'display: none;' : 'display: inline-block;'}">
+                    <i class="fa-solid fa-unlock"></i>
+                </button>
+                <button
+                    title="Chỉnh sửa thông tin"
+                    class="btn btn-primary btn-sm edit"
+                    type="button"
+                    onclick="openEditUserModal(${user.id})">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </td>
         `;
                 tbody.appendChild(row);
             });
+
+            // Gắn lại sự kiện
+            tbody.querySelectorAll('.ban').forEach(button => {
+                button.addEventListener('click', () => toggleBanUnban(button, 'ban'));
+            });
+
+            tbody.querySelectorAll('.unban').forEach(button => {
+                button.addEventListener('click', () => toggleBanUnban(button, 'unban'));
+            });
         }
+
+
+        function toggleBanUnban(button, action) {
+            const userId = button.getAttribute('data-user-id');
+            const isBan = action === 'ban';
+            const url = `../controllers/UserController.php?action=${isBan ? 'banUser' : 'unbanUser'}&id=${userId}`;
+
+            fetch(url, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const row = document.getElementById(`user-${userId}`);
+                        if (row) {
+                            const banBtn = row.querySelector('.ban');
+                            const unbanBtn = row.querySelector('.unban');
+                            const cells = row.querySelectorAll('td');
+
+                            // Cập nhật hiển thị
+                            if (isBan) {
+                                banBtn.style.display = 'none';
+                                unbanBtn.style.display = 'inline-block';
+                                cells.forEach(cell => cell.style.color = 'red');
+                                alert("Khóa người dùng thành công");
+                            } else {
+                                unbanBtn.style.display = 'none';
+                                banBtn.style.display = 'inline-block';
+                                cells.forEach(cell => cell.style.color = '');
+                                alert("Mở khóa người dùng thành công");
+                            }
+                        }
+                    } else {
+                        alert(data.message || 'Thao tác thất bại!');
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi khi khóa/mở khóa:", error);
+                    alert("Có lỗi xảy ra khi gửi yêu cầu.");
+                });
+        }
+
+
+
 
         // Cập nhật URL khi chuyển trang
         function updateUserUrl(page = 1) {

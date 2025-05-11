@@ -1,3 +1,17 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['adminId'])) {
+    echo "<script>
+        alert('Vui lòng đăng nhập với quyền admin');
+        window.location.href = 'signinadmin.php';
+    </script>";
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,6 +29,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
     <title>Quản lý sản phẩm</title>
 </head>
+<style>
+    .hidden-product {
+        opacity: 0.5;
+        background-color: #f8d7da;
+    }
+</style>
 
 <body>
     <?php
@@ -165,19 +185,105 @@
             <td><img src="../uploads/products/${product.image}" alt="${product.name}" width="50"></td>
             <td>${product.stock}</td>
             <td>${product.status ? 'Còn hàng' : 'Hết hàng'}</td>
-      <td>${parseInt(product.price).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+            <td>${parseInt(product.price).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
             <td>${product.category_id}</td>
             <td>
-<button class="btn btn-primary btn-sm edit" onclick="editProduct(${product.id})">
-    <i class="fas fa-edit"></i>
-</button>
-                <button class="btn btn-danger btn-sm delete" onclick="deleteProduct(${product.id})">
-                    <i class="fas fa-trash"></i>
+                <button class="btn btn-primary btn-sm edit" onclick="editProduct(${product.id})">
+                    <i class="fas fa-edit"></i>
                 </button>
+
+                ${product.is_hide == 1
+                    ? `<button title="Mở bán" class="btn btn-success btn-sm unhide" onclick="unhideProduct(${product.id})">
+                           <i class="fas fa-eye"></i>
+                       </button>`
+                    : `<button class="btn btn-danger btn-sm delete" onclick="deleteProduct(${product.id})">
+                           <i class="fas fa-trash"></i>
+                       </button>`
+                }
             </td>
         `;
                 tbody.appendChild(row);
             });
+        }
+
+        function unhideProduct(productId) {
+            if (!confirm("Bạn có chắc chắn muốn mở bán lại sản phẩm này không?")) return;
+
+            fetch('../controllers/ProductController.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `action=unhideProduct&id=${productId}`
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Đã mở bán lại sản phẩm.");
+                        location.reload(); // Tải lại trang
+                    } else {
+                        alert("Lỗi: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi:', error);
+                });
+        }
+
+        function deleteProduct(productId) {
+            // Gửi request kiểm tra sản phẩm đã bán chưa
+            fetch(`../controllers/ProductController.php?action=checkProductSold&id=${productId}`)
+                .then(res => res.json())
+                .then(result => {
+                    if (result.sold) {
+                        // Nếu đã bán -> chỉ được ẩn
+                        if (confirm("Sản phẩm đã từng được bán, chỉ có thể chuyển sang trạng thái ẩn. Bạn có muốn tiếp tục?")) {
+                            fetch('../controllers/ProductController.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded'
+                                    },
+                                    body: `action=hideProduct&id=${productId}`
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        alert("Đã chuyển sản phẩm sang trạng thái ẩn.");
+                                        location.reload(); // Tải lại trang
+                                    } else {
+                                        alert("Lỗi: " + data.error);
+                                    }
+                                });
+                        }
+                    } else {
+                        // Nếu chưa từng bán -> xóa bình thường
+                        if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) return;
+
+                        fetch('../controllers/ProductController.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: `action=deleteProduct&id=${productId}`
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const row = document.querySelector(`#product-${productId}`);
+                                    if (row) row.remove();
+                                    alert("Xóa sản phẩm thành công.");
+                                } else {
+                                    alert("Lỗi: " + data.error);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Lỗi:', error);
+                            });
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi kiểm tra trạng thái sản phẩm:', error);
+                });
         }
 
         function editProduct(id) {
@@ -266,31 +372,6 @@
             // Gọi API lấy danh sách sản phẩm
             fetchProductsFromServer(urlParams);
         };
-
-        function deleteProduct(productId) {
-            if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) return;
-
-            fetch('../controllers/ProductController.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `action=deleteProduct&id=${productId}`
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        const row = document.querySelector(`#product-${productId}`);
-                        if (row) row.remove();
-                        alert("Xóa sản phẩm thành công.");
-                    } else {
-                        alert("Lỗi: " + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Lỗi:', error);
-                });
-        }
     </script>
 </body>
 

@@ -17,7 +17,7 @@ if (session_status() == PHP_SESSION_NONE) {
     <link rel="stylesheet" href="../assets/fontawesome-free-6.2.0-web/css/all.css">
     <link rel="stylesheet" href="../assets/bootstrap-5.2.2-dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/font_Roboto/Roboto-Bold.ttf">
-    <link rel="stylesheet" href="../assets/css/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="../assets/themify-icons/themify-icons.css">
     <link rel="stylesheet" href="../assets/css/product.css">
     <script src="../assets/js/jquery.min.js"></script>
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -76,7 +76,7 @@ if (session_status() == PHP_SESSION_NONE) {
                                     <ul>
                                         <li><input name="brand" type="checkbox" id="kenny" value="Kenny Furniture"> Kenny Furniture</li>
                                         <li><input name="brand" type="checkbox" id="first_impression"
-                                                value="First Impression" onclick="filterProducts()"> First Impression
+                                                value="First Impression"> First Impression
                                         </li>
                                         <li><input name="brand" type="checkbox" id="big_one" value="Big One"> Big One</li>
                                         <li><input name="brand" type="checkbox" id="furniland" value="Furniland"> Furniland</li>
@@ -191,6 +191,33 @@ if (session_status() == PHP_SESSION_NONE) {
         });
 
 
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryParam = urlParams.get("category");
+
+            console.log("Giá trị thô từ URL:", categoryParam); // Chuỗi đã mã hóa (encoded)
+
+            if (categoryParam) {
+                const decoded = decodeURIComponent(categoryParam);
+                console.log("Giá trị sau decodeURIComponent:", decoded); // Chuỗi tiếng Việt
+
+                const selectedCategories = decoded.split(',');
+                console.log("Danh sách category sau khi tách:", selectedCategories); // Mảng các danh mục
+
+                const checkboxes = document.querySelectorAll('input[name="category"]');
+
+                checkboxes.forEach(checkbox => {
+                    if (selectedCategories.includes(checkbox.value)) {
+                        checkbox.checked = true;
+                        console.log("Đã check:", checkbox.value);
+                    }
+                });
+            }
+        });
+
+
+
+
 
         // function updateUrl(categories, brands) {
         //     // Mã hóa categories và brands thành chuỗi JSON và sau đó mã hóa URL
@@ -207,52 +234,9 @@ if (session_status() == PHP_SESSION_NONE) {
         // }
 
         // Hàm để lấy danh sách sản phẩm bán chạy
-        function renderTopSellingProducts() {
-            // Lấy danh sách orders từ localStorage
-            const orders = JSON.parse(localStorage.getItem('orders')) || [];
-
-            // Tạo đối tượng đếm số lượng bán ra của từng sản phẩm
-            const productCounts = {};
-            orders.forEach(order => {
-                order.products.forEach(product => {
-                    if (!productCounts[product.id]) {
-                        productCounts[product.id] = {
-                            ...product,
-                            count: 0
-                        };
-                    }
-                    productCounts[product.id].count += product.quantity;
-                });
-            });
-
-            // Chuyển đổi đối tượng thành mảng và sắp xếp giảm dần theo số lượng
-            const sortedProducts = Object.values(productCounts).sort((a, b) => b.count - a.count);
-
-            // Lấy 5 sản phẩm bán chạy nhất
-            const topProducts = sortedProducts.slice(0, 5);
-
-            // Render ra HTML
-            const hotProductContainer = document.getElementById('hot-product');
-            hotProductContainer.innerHTML = '';
-
-            topProducts.forEach(product => {
-                const productHTML = `
-            <div class="hot_item row">
-                <div class="col-4">
-                    <img src="${getBasePath() + product.image}" alt="${product.title}">
-                </div>
-                <div class="col-8">
-                    <h5><a href="${getBasePath()}/SanPham/html/category/detail_item/product_detail.html?id=${product.id}">${product.title}</a></h5>
-                    <p>${product.price.toLocaleString()}<u>đ</u></p>
-                </div>
-            </div>
-        `;
-                hotProductContainer.insertAdjacentHTML('beforeend', productHTML);
-            });
-        }
 
         // Gọi hàm khi trang được load
-        document.addEventListener('DOMContentLoaded', renderTopSellingProducts);
+
 
         function getSelectedValues(name) {
             let selectedValues = [];
@@ -287,19 +271,32 @@ if (session_status() == PHP_SESSION_NONE) {
             fetchProductsFromServer(params);
         }
 
-        // Định nghĩa hàm renderProducts bên ngoài DOMContentLoaded
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.has('page')) {
+                updateUrl(1); // Gắn page=1 nếu chưa có tham số nào
+            } else {
+                fetchProductsFromServer(urlParams); // Nếu đã có thì dùng trực tiếp
+            }
+        });
+
+
         function renderProducts(products) {
             const container = document.getElementById('product');
             container.innerHTML = '';
-            if (products.length === 0) {
-                container.innerHTML = '<p>Không có sản phẩm phù hợp.</p>';
+
+            const visibleProducts = products.filter(product => product.is_hide != 1); // Bỏ sản phẩm bị ẩn
+
+            if (visibleProducts.length == 0) {
+                container.innerHTML = '<p style="text-align:center;margin:20px 0 20px 0">Không có sản phẩm phù hợp.</p>';
                 return;
             }
-            products.forEach(product => {
+
+            visibleProducts.forEach(product => {
                 const html = `
         <div class="lazyload col-xs-12 col-sm-6 col-md-4 col-lg-4">
             <div class="lazyload_item popup category_right_content_item">
-                <img src="../uploads/${product.image}" alt="${product.name}">
+                <img src="../uploads/products/${product.image}" alt="${product.name}">
                 <h5><a href="">${product.name}</a></h5>
                 <p>${Number(product.price).toLocaleString()} <u>Đ</u></p>
                 <ul class="popup_item">
@@ -314,13 +311,13 @@ if (session_status() == PHP_SESSION_NONE) {
         </div>`;
                 container.innerHTML += html;
 
-                // Gắn sự kiện click vào nút "Mua hàng"
                 document.getElementById(`add-cart-${product.id}`).addEventListener('click', function(e) {
                     e.preventDefault();
-                    addToCart(product.id, 1); // Số lượng mặc định là 1
+                    addToCart(product.id, 1);
                 });
             });
         }
+
 
         // Hàm fetchProductsFromServer không cần thay đổi
         function fetchProductsFromServer(params) {
@@ -358,9 +355,32 @@ if (session_status() == PHP_SESSION_NONE) {
         window.onload = function() {
             setCheckboxStateFromUrl();
 
-            // ✅ Gọi fetch khi load lần đầu dựa vào URL
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('category') || urlParams.has('brand') || urlParams.has('price') || urlParams.has('page')) {
+
+            // Nếu có param "key" thì xóa các filter khác
+            if (urlParams.has('key')) {
+                urlParams.delete('category');
+                urlParams.delete('brand');
+                urlParams.delete('price');
+
+                // Cập nhật URL để giữ lại chỉ key và page
+                const key = urlParams.get('key');
+                const page = urlParams.get('page') || '1';
+                const newUrl = `?key=${encodeURIComponent(key)}&page=${page}`;
+                history.replaceState(null, '', newUrl);
+
+                // Gọi fetch với URL mới
+                fetchProductsFromServer(new URLSearchParams(`key=${key}&page=${page}`));
+            }
+            // Ngược lại nếu có filter thì xóa key
+            else if (urlParams.has('category') || urlParams.has('brand') || urlParams.has('price')) {
+                urlParams.delete('key');
+
+                // Cập nhật URL để giữ lại các filter và page
+                const newUrl = `?${urlParams.toString()}`;
+                history.replaceState(null, '', newUrl);
+
+                // Gọi fetch với filter mới
                 fetchProductsFromServer(urlParams);
             }
 
@@ -374,46 +394,47 @@ if (session_status() == PHP_SESSION_NONE) {
             });
         };
 
+
         // Định nghĩa hàm addToCart bên ngoài DOMContentLoaded
-        function addToCart(productId, quantity) {
-            $.ajax({
-                url: '../controllers/CartController.php',
-                method: 'POST',
-                data: {
-                    action: 'addItem',
-                    productId: productId,
-                    quantity: quantity
-                },
-                success: function(response) {
-                    console.log('Phản hồi từ server:', response);
+        // function addToCart(productId, quantity) {
+        //     $.ajax({
+        //         url: '../controllers/CartController.php',
+        //         method: 'POST',
+        //         data: {
+        //             action: 'addItem',
+        //             productId: productId,
+        //             quantity: quantity
+        //         },
+        //         success: function(response) {
+        //             console.log('Phản hồi từ server:', response);
 
-                    // Bỏ qua JSON.parse, vì response đã là đối tượng
-                    try {
-                        console.log('Status:', response.status);
-                        if (response.status === 'success') {
-                                
-                            // Cập nhật số lượng giỏ hàng trên header
-                            const cartSpan = document.querySelector('.cart span');
-                            if (cartSpan) {
-                                cartSpan.innerHTML = response.totalQuantity;
-                                console.log('totalQuantity:', response.totalQuantity);
-                            } else {
-                                console.error('Không tìm thấy phần tử giỏ hàng');
-                            }
-                        } else {
-                            alert(response.message || 'Có lỗi xảy ra, vui lòng thử lại!');
-                        }
-                    } catch (e) {
-                        console.error('Lỗi xử lý phản hồi:', e);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX error:', status, error);
-                    alert('Không thể kết nối máy chủ. Vui lòng thử lại!');
-                }
-            });
+        //             // Bỏ qua JSON.parse, vì response đã là đối tượng
+        //             try {
+        //                 console.log('Status:', response.status);
+        //                 if (response.status === 'success') {
 
-        }
+        //                     // Cập nhật số lượng giỏ hàng trên header
+        //                     const cartSpan = document.querySelector('.cart span');
+        //                     if (cartSpan) {
+        //                         cartSpan.innerHTML = response.totalQuantity;
+        //                         console.log('totalQuantity:', response.totalQuantity);
+        //                     } else {
+        //                         console.error('Không tìm thấy phần tử giỏ hàng');
+        //                     }
+        //                 } else {
+        //                     alert(response.message || 'Có lỗi xảy ra, vui lòng thử lại!');
+        //                 }
+        //             } catch (e) {
+        //                 console.error('Lỗi xử lý phản hồi:', e);
+        //             }
+        //         },
+        //         error: function(xhr, status, error) {
+        //             console.error('AJAX error:', status, error);
+        //             alert('Không thể kết nối máy chủ. Vui lòng thử lại!');
+        //         }
+        //     });
+
+        // }
 
 
 
@@ -462,9 +483,52 @@ if (session_status() == PHP_SESSION_NONE) {
                 });
             });
         }
-
-
     </script>
+    <?php if (!isset($_SESSION['userId'])): ?>
+        <script>
+            function addToCart(productId, quantity) {
+                alert('Vui lòng đăng nhập để mua hàng');
+            }
+        </script>
+    <?php else: ?>
+        <script>
+            function addToCart(productId, quantity) {
+                $.ajax({
+                    url: '../controllers/CartController.php',
+                    method: 'POST',
+                    data: {
+                        action: 'addItem',
+                        productId: productId,
+                        quantity: quantity
+                    },
+                    success: function(response) {
+                        console.log('Phản hồi từ server:', response);
+                        try {
+                            console.log('Status:', response.status);
+                            if (response.status === 'success') {
+                                const cartSpan = document.querySelector('.cart span');
+                                if (cartSpan) {
+                                    cartSpan.innerHTML = response.totalQuantity;
+                                    console.log('totalQuantity:', response.totalQuantity);
+                                } else {
+                                    console.error('Không tìm thấy phần tử giỏ hàng');
+                                }
+                            } else {
+                                alert(response.message || 'Có lỗi xảy ra, vui lòng thử lại!');
+                            }
+                        } catch (e) {
+                            console.error('Lỗi xử lý phản hồi:', e);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX error:', status, error);
+                        alert('Không thể kết nối máy chủ. Vui lòng thử lại!');
+                    }
+                });
+            }
+        </script>
+    <?php endif; ?>
+
 </body>
 
 </html>

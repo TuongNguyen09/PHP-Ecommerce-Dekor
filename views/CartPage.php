@@ -14,7 +14,7 @@ if (session_status() == PHP_SESSION_NONE) {
     <link rel="stylesheet" href="../assets/fontawesome-free-6.2.0-web/css/all.css">
     <link rel="stylesheet" href="../assets/bootstrap-5.2.2-dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/font_Roboto/Roboto-Bold.ttf">
-    <link rel="stylesheet" href="../../css/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="../assets/themify-icons/themify-icons.css">
     <link rel="stylesheet" href="../assets/css/product.css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="../assets/js/jquery.min.js"></script>
@@ -58,10 +58,10 @@ if (session_status() == PHP_SESSION_NONE) {
                 </div>
                 <div class="link-bottom">
                     <div>
-                        <a href="../../SanPham/html/category/product.html" class="text-body"><i class="fas fa-long-arrow-alt-left me-2"></i>Tiếp tục mua</a>
+                        <a href="./productpage.php" class="text-body"><i class="fas fa-long-arrow-alt-left me-2"></i>Tiếp tục mua</a>
                     </div>
                     <div class="checkout">
-                        <a href="../../SanPham/html/checkout.html" id="checkout-link">Bắt đầu thanh toán<i style="margin-left: 0.5rem !important;" class="fas fa-long-arrow-alt-right me-2"></i></a>
+                        <a href="./checkoutpage.php" id="checkout-link">Bắt đầu thanh toán<i style="margin-left: 0.5rem !important;" class="fas fa-long-arrow-alt-right me-2"></i></a>
                     </div>
                 </div>
             </div>

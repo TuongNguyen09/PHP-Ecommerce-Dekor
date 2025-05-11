@@ -6,9 +6,9 @@ require_once '../controllers/ProductController.php';
 
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $productId = (int)$_GET['id'];
-
+    echo $productId;
     $controller = new ProductController();
-    $product = $controller->getProductById($productId); // ✅ dùng hàm mới
+    $product = $controller->getProductById1($productId); // ✅ Sử dụng hàm đã sửa
 
     if ($product) {
         $productId = $product['id'];
@@ -24,6 +24,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 } else {
     echo "ID sản phẩm không hợp lệ";
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,7 +36,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     <link rel="stylesheet" href="../assets/fontawesome-free-6.2.0-web/css/all.css">
     <link rel="stylesheet" href="../assets/bootstrap-5.2.2-dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/font_Roboto/Roboto-Bold.ttf">
-    <link rel="stylesheet" href="../assets/css/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="../assets/themify-icons/themify-icons.css">
     <script src="../assets/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="../assets/css/detail_item.css">
     <link rel="stylesheet" href="../assets/css/product.css">
@@ -91,68 +92,66 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                             <ul>
                                 <li class="category_left_menu">
                                     <i class="fas fa-chevron-right"></i>
-                                    <a href="javascript:void(0)" onclick='updateUrl(["all"], [])'>Tất cả sản phẩm</a>
+                                    <a href="/php-ecommerce-dekor/views/productpage.php?category=all&page=1">Tất cả sản phẩm</a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li class="category_left_menu">
                                     <i class="fas fa-chevron-right"></i>
-                                    <a href="javascript:void(0)" onclick='updateUrl(["Bàn gỗ"], [])'>Bàn Gỗ</a>
+                                    <a href="/php-ecommerce-dekor/views/productpage.php?category=Bàn+gỗ&page=1">Bàn Gỗ</a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li class="category_left_menu">
                                     <i class="fas fa-chevron-right"></i>
-                                    <a href="javascript:void(0)" onclick="updateUrl(['Kệ sách'], [])">Kệ Sách</a>
+                                    <a href="/php-ecommerce-dekor/views/productpage.php?category=Kệ+sách&page=1">Kệ Sách</a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li class="category_left_menu">
                                     <i class="fas fa-chevron-right"></i>
-                                    <a href="javascript:void(0)" onclick="updateUrl(['Rèm cửa'], [])">Rèm Cửa</a>
+                                    <a href="/php-ecommerce-dekor/views/productpage.php?category=Rèm+cửa&page=1">Rèm Cửa</a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li class="category_left_menu">
                                     <i class="fas fa-chevron-right"></i>
-                                    <a href="javascript:void(0)" onclick="updateUrl(['Ghế sofa'], [])">Ghế Sofa</a>
+                                    <a href="/php-ecommerce-dekor/views/productpage.php?category=Ghế+sofa&page=1">Ghế Sofa</a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li class="category_left_menu">
                                     <i class="fas fa-chevron-right"></i>
-                                    <a href="javascript:void(0)" onclick="updateUrl(['Tủ quần áo'], [])">Tủ Quần Áo</a>
+                                    <a href="/php-ecommerce-dekor/views/productpage.php?category=Tủ+quần+áo&page=1">Tủ Quần Áo</a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li class="category_left_menu">
                                     <i class="fas fa-chevron-right"></i>
-                                    <a href="javascript:void(0)" onclick="updateUrl(['Giường ngủ'], [])">Giường Ngủ</a>
+                                    <a href="/php-ecommerce-dekor/views/productpage.php?category=Giường+ngủ&page=1">Giường Ngủ</a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li class="category_left_menu">
                                     <i class="fas fa-chevron-right"></i>
-                                    <a href="javascript:void(0)" onclick="updateUrl(['Phòng tắm'], [])">Phòng Tắm</a>
+                                    <a href="/php-ecommerce-dekor/views/productpage.php?category=Phòng+tắm&page=1">Phòng Tắm</a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li class="category_left_menu">
                                     <i class="fas fa-chevron-right"></i>
-                                    <a href="javascript:void(0)" onclick="updateUrl(['Đèn trang trí'], [])">Đèn trang
-                                        trí</a>
+                                    <a href="/php-ecommerce-dekor/views/productpage.php?category=Đèn+trang+trí&page=1">Đèn trang trí</a>
                                 </li>
-
-
                             </ul>
+
                             <script>
                                 const itemsliderbar = document.querySelectorAll(".category_left_menu")
                                 itemsliderbar.forEach(function(menu, index) {
@@ -175,7 +174,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                 </div>
 
                 <div class="col-md-12 col-lg-9 row category_right">
-                    <div class="col-sm-12 col-md-6" id="product-image"><img src="../uploads/<?php echo htmlspecialchars($productImage); ?>"></div>
+                    <div class="col-sm-12 col-md-6" id="product-image"><img src="../uploads/products/<?php echo htmlspecialchars($productImage); ?>"></div>
                     <div class="col-sm-12 col-md-6">
                         <div>
                             <div class="details_pro">
@@ -242,8 +241,11 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                             </li>
                         </ul>
                         <div class="tab_float">
-                            <div class="tab_1">
-                                <p>Chất liêu: Sản xuất từ Gỗ MDF sơn Bệt 2k</p>
+                            <div style="text-align:left" class="tab_1">
+                                <?php
+                                    echo $productDescription;
+                                ?>
+                                <!-- <p>Chất liêu: Sản xuất từ Gỗ MDF sơn Bệt 2k</p>
                                 <p>Kích thước: 800x800x350mm(Quý khách có thể đặt kích thước khác để phù hợp với phòng nhà mình)</p>
                                 <p>Màu: nâu</p>
                                 <p>Chất lượng: Gỗ công nghiệp MDF nhập khẩu nguyên tấm từ Malaysia, vật liệu chất lượng cao.</p>
@@ -252,7 +254,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                 <p>Ghế được làm bằng hộp thép tròn phi 19 , 21,.v..v độ dày 1mm, thép mạ kém, hoặc thép sơn tĩnh điện,tùy theo khách hàng lựa chọn,.</p>
                                 <p>Sợi dây nhựa giả mây cao cấp nhất Việt Nam.</p>
                                 <p>Không gian của bạn cần một loại ghế đơn giản nhưng sang trọng thì đó là ghế TF 018.</p>
-                                <p>Thiết kế của ghế TF 018, giúp bạn tiết kiệm không gian, ghế có thể chồng lên nhau từ 4 - 8 ghế khi bạn cần thu dọn, để lấy không gian</p><img src="http://127.0.0.1:5500/Facility/Sanpham/img/category/Ban/2.png">
+                                <p>Thiết kế của ghế TF 018, giúp bạn tiết kiệm không gian, ghế có thể chồng lên nhau từ 4 - 8 ghế khi bạn cần thu dọn, để lấy không gian</p><img src="http://127.0.0.1:5500/Facility/Sanpham/img/category/Ban/2.png"> -->
                             </div>
                             <div class="tab_2">
                                 <p>Bước 1: Tìm sản phẩm cần mua Bạn có thể truy cập website để tìm và chọn sản phẩm muốn
@@ -319,23 +321,24 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             $('.add_to_cart_btn').click(function(e) {
                 e.preventDefault();
 
-                // Kiểm tra xem sự kiện click có được gọi không
+                <?php if (!isset($_SESSION['userId'])): ?>
+                    alert('Vui lòng đăng nhập để mua hàng');
+                    return;
+                <?php endif; ?>
+
                 console.log('Nút "Thêm vào giỏ hàng" đã được nhấn.');
 
-                // Lấy thông tin sản phẩm và số lượng
                 var productId = <?php echo $productId; ?>;
-                var quantity = $('.input-qty').val(); // Lấy giá trị từ ô input số lượng
+                var quantity = $('.input-qty').val();
 
-                // Kiểm tra giá trị lấy được từ input
                 console.log('Product ID: ' + productId);
                 console.log('Quantity: ' + quantity);
 
-                // Gửi yêu cầu thêm vào giỏ hàng
                 $.ajax({
-                    url: '../controllers/CartController.php', // Đường dẫn tới controller PHP xử lý thêm sản phẩm
+                    url: '../controllers/CartController.php',
                     method: 'POST',
                     data: {
-                        action: 'addItem', // Action để xác định hành động cần thực hiện
+                        action: 'addItem',
                         productId: productId,
                         quantity: quantity
                     },
@@ -357,6 +360,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                 });
             });
         });
+
 
 
         function getBasePath() {

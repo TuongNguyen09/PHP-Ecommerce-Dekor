@@ -22,6 +22,47 @@ class UserModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getTopSpendingUsers($limit = 10, $fromDate = null, $toDate = null)
+    {
+        $query = "SELECT u.id, u.fullname, u.email, u.phone,
+                     SUM(p.price * oi.quantity) AS total_revenue
+              FROM user u
+              JOIN orders o ON u.id = o.user_id
+              JOIN order_item oi ON o.id = oi.order_id
+              JOIN product p ON oi.product_id = p.id
+              WHERE o.status = 'Đã giao thành công'";
+
+        if (!empty($fromDate)) {
+            $query .= " AND o.order_date >= :fromDate";
+        }
+
+        if (!empty($toDate)) {
+            $query .= " AND o.order_date <= :toDate";
+        }
+
+        $query .= " GROUP BY u.id
+                ORDER BY total_revenue DESC
+                LIMIT :limit";
+
+        $stmt = $this->conn->prepare($query);
+
+        if (!empty($fromDate)) {
+            $stmt->bindParam(':fromDate', $fromDate);
+        }
+
+        if (!empty($toDate)) {
+            $stmt->bindParam(':toDate', $toDate);
+        }
+
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+
     // Lấy người dùng theo ID
     public function getUserById($id)
     {
@@ -35,7 +76,7 @@ class UserModel
     // Lấy người dùng theo tên tài khoản (username)
     public function getUserByUsername($username)
     {
-        $query = "SELECT id, username, email, password, is_banned FROM " . $this->table . " WHERE username = :username";
+        $query = "SELECT id, role, username, email, password, is_banned FROM " . $this->table . " WHERE username = :username";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':username', $username);
         $stmt->execute();
@@ -61,10 +102,14 @@ class UserModel
         $password = password_hash($data['password'], PASSWORD_BCRYPT);
         $date_of_birth = $data['birthday'] ?? null; // Nếu có ngày sinh
         $gender = $data['gender'] ?? 'other'; // Mặc định là 'other'
-        $role = 'user'; // Mặc định là 'user'
+
+        // Kiểm tra xem có 'role' trong $data hay không, nếu không có thì gán là 'user'
+        $role = isset($data['role']) ? $data['role'] : 'user'; // Nếu có thì lấy giá trị từ $data['role'], nếu không có thì gán 'user'
+
         $is_banned = 0; // Mặc định là chưa bị cấm
         $is_signIn = 0; // Mặc định là chưa đăng nhập
         $created_at = date('Y-m-d H:i:s');
+
 
         // Gắn tham số vào câu lệnh SQL
         $stmt->bindParam(':username', $username);
@@ -98,34 +143,74 @@ class UserModel
     // Cập nhật người dùng
     public function updateUser($id, $data)
     {
+        $setClauses = [];
+        $params = [
+            ':id' => $id
+        ];
+
+        // Kiểm tra và thêm các trường vào câu lệnh SQL nếu chúng tồn tại trong dữ liệu
+        if (!empty($data['username'])) {
+            $setClauses[] = "username = :username";
+            $params[':username'] = htmlspecialchars(strip_tags($data['username']));
+        }
+        if (!empty($data['email'])) {
+            $setClauses[] = "email = :email";
+            $params[':email'] = htmlspecialchars(strip_tags($data['email']));
+        }
+        if (!empty($data['phone'])) {
+            $setClauses[] = "phone = :phone";
+            $params[':phone'] = htmlspecialchars(strip_tags($data['phone']));
+        }
+        if (!empty($data['fullname'])) {
+            $setClauses[] = "fullname = :fullname";
+            $params[':fullname'] = htmlspecialchars(strip_tags($data['fullname']));
+        }
+        if (!empty($data['birthday'])) {
+            $setClauses[] = "date_of_birth = :birthday";
+            $params[':birthday'] = htmlspecialchars(strip_tags($data['birthday']));
+        }
+        if (!empty($data['gender'])) {
+            $setClauses[] = "gender = :gender";
+            $params[':gender'] = htmlspecialchars(strip_tags($data['gender']));
+        }
+
+        // Nếu không có trường nào cần cập nhật, return false
+        if (empty($setClauses)) {
+            return false;
+        }
+
+        // Tạo câu lệnh SQL động với các trường cần cập nhật
         $query = "UPDATE " . $this->table . " 
-                  SET username = :username,
-                      email = :email,
-                      phone = :phone,
-                      fullname = :fullname,
-                      date_of_birth = :birthday,
-                      gender = :gender
-                  WHERE id = :id"; // Đã loại bỏ dấu phẩy thừa ở đây
+                  SET " . implode(', ', $setClauses) . " 
+                  WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
 
-        $username = htmlspecialchars(strip_tags($data['username']));
-        $email = htmlspecialchars(strip_tags($data['email']));
-        $phone = htmlspecialchars(strip_tags($data['phone']));
-        $fullname = htmlspecialchars(strip_tags($data['fullname']));
-        $birthday = htmlspecialchars(strip_tags($data['birthday']));
-        $gender = htmlspecialchars(strip_tags($data['gender']));
-
-        $stmt->bindParam(':username', $username);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':phone', $phone);
-        $stmt->bindParam(':fullname', $fullname);
-        $stmt->bindParam(':birthday', $birthday);
-        $stmt->bindParam(':gender', $gender);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        // Gắn các tham số vào câu lệnh SQL
+        foreach ($params as $param => $value) {
+            $stmt->bindParam($param, $value);
+        }
 
         return $stmt->execute();
     }
+
+
+    public function banUserById($id)
+    {
+        $query = "UPDATE {$this->table} SET is_banned = 1 WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function unbanUserById($id)
+    {
+        $query = "UPDATE {$this->table} SET is_banned = 0 WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
 
 
 

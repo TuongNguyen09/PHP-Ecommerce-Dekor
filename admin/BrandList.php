@@ -1,3 +1,18 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['adminId'])) {
+    echo "<script>
+        alert('Vui lòng đăng nhập với quyền admin');
+        window.location.href = 'signinadmin.php';
+    </script>";
+    exit();
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -185,7 +200,7 @@
 
     <div id="editUserModal" class="overlay-modal" style="display: none;">
         <div class="modal-content">
-            <span class="close" onclick="closeEditCategoryModal()">&times;</span>
+            <span class="close" onclick="closeEditBrandModal()">&times;</span>
             <h4 style="color: #DD0000;font-weight: 600;">THÔNG TIN NHÀ CUNG CẤP</h4>
             <form id="editUserForm">
                 <input type="hidden" id="editUserId">

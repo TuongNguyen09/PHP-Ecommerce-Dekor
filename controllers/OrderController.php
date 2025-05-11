@@ -28,17 +28,25 @@ class OrderController
         $this->addressModel = new AddressModel();
         $this->productModel = new ProductModel();
     }
-
     public function listOrders()
     {
         try {
-            // Lấy danh sách đơn hàng từ model
-            $orders = $this->orderModel->getAllOrders();
-            $perPage = 10;  // Số lượng đơn hàng mỗi trang
+            $perPage = 10;
             $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
-            // Lọc theo status
-            if (isset($_GET['status']) && $_GET['status'] !== '') {
+            // Lấy danh sách đơn hàng từ model
+            $orders = $this->orderModel->getAllOrders();
+
+            // Ưu tiên lọc theo user_id nếu có
+            if (!empty($_GET['user_id'])) {
+                $userId = $_GET['user_id'];
+                $orders = array_filter($orders, function ($order) use ($userId) {
+                    return $order['user_id'] == $userId;
+                });
+            }
+
+            // Lọc theo trạng thái đơn hàng
+            if (!empty($_GET['status']) && $_GET['status'] !== 'Tất cả') {
                 $statuses = explode(',', $_GET['status']);
                 $orders = array_filter($orders, function ($order) use ($statuses) {
                     return in_array($order['status'], $statuses);
@@ -46,15 +54,15 @@ class OrderController
             }
 
             // Lọc theo phương thức thanh toán
-            if (isset($_GET['payment']) && $_GET['payment'] !== '') {
+            if (!empty($_GET['payment'])) {
                 $methods = explode(',', $_GET['payment']);
                 $orders = array_filter($orders, function ($order) use ($methods) {
                     return in_array($order['payment_method'], $methods);
                 });
             }
 
-            // Lọc theo khoảng ngày đặt hàng (order_date)
-            if (isset($_GET['fromDate']) && isset($_GET['toDate'])) {
+            // Lọc theo khoảng ngày
+            if (!empty($_GET['fromDate']) && !empty($_GET['toDate'])) {
                 $from = $_GET['fromDate'];
                 $to = $_GET['toDate'];
                 $orders = array_filter($orders, function ($order) use ($from, $to) {
@@ -62,34 +70,68 @@ class OrderController
                 });
             }
 
-            // Phân trang
+            // Lọc theo product_id nếu có
+            if (!empty($_GET['product_id'])) {
+                $productId = $_GET['product_id'];
+                $orders = array_filter($orders, function ($order) use ($productId) {
+                    $orderItems = $this->orderItemModel->getItemsByOrderId($order['id']);
+                    foreach ($orderItems as $item) {
+                        if ($item['product_id'] == $productId) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+            }
+
+            // Lọc theo address nếu có
+            if (!empty($_GET['city']) || !empty($_GET['district']) || !empty($_GET['ward'])) {
+                $city = isset($_GET['city']) ? strtolower(trim($_GET['city'])) : '';
+                $district = isset($_GET['district']) ? strtolower(trim($_GET['district'])) : '';
+                $ward = isset($_GET['ward']) ? strtolower(trim($_GET['ward'])) : '';
+
+                $orders = array_filter($orders, function ($order) use ($city, $district, $ward) {
+                    $address = $this->addressModel->getAddressById($order['address_id']);
+                    $addressCity = isset($address['city']) ? strtolower($address['city']) : '';
+                    $addressDistrict = isset($address['district']) ? strtolower($address['district']) : '';
+                    $addressWard = isset($address['ward']) ? strtolower($address['ward']) : '';
+
+                    // Kiểm tra từng trường một cách độc lập
+                    $cityMatch = empty($city) || strpos($addressCity, $city) !== false;
+                    $districtMatch = empty($district) || strpos($addressDistrict, $district) !== false;
+                    $wardMatch = empty($ward) || strpos($addressWard, $ward) !== false;
+
+                    return $cityMatch && $districtMatch && $wardMatch;
+                });
+            }
+
+            if (empty($orders)) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'message' => 'Không tìm thấy đơn hàng phù hợp',
+                    'orders' => [],
+                    'totalPages' => 0,
+                    'currentPage' => $currentPage
+                ]);
+                return;
+            }
+
+            // Phân trang và gắn thông tin phụ trợ
             $totalItems = count($orders);
             $totalPages = ceil($totalItems / $perPage);
             $offset = ($currentPage - 1) * $perPage;
             $paginatedData = array_slice($orders, $offset, $perPage);
 
-            // Thêm tên người dùng và địa chỉ vào mỗi đơn hàng
             foreach ($paginatedData as &$order) {
-                // Lấy tên người dùng
-                $order['fullname'] = $this->userModel->getFullnameById($order['user_id']);
-
-                // Lấy địa chỉ từ address model
+                $order['items'] = $this->orderItemModel->getItemsByOrderId($order['id']);
+                $order['user'] = $this->userModel->getUserById($order['user_id']);
                 $address = $this->addressModel->getAddressById($order['address_id']);
-
-                // Kiểm tra nếu địa chỉ có đủ thông tin
-                if (isset($address['street'], $address['ward'], $address['district'], $address['city'])) {
-                    // Ghép địa chỉ thành chuỗi
-                    $order['address_detail'] = $address['street'] . ', ' . $address['ward'] . ', ' . $address['district'] . ', ' . $address['city'];
-                } else {
-                    // Nếu thiếu thông tin, có thể trả về chuỗi lỗi hoặc chỉ ghi đơn giản "Không có địa chỉ"
-                    $order['address_detail'] = 'Không có địa chỉ';
-                }
-
-                $order['delivery_status'] = $order['delivery_date'];  // Nếu có giá trị, trả về ngày giao
-
+                $order['address_detail'] = isset($address['street'], $address['ward'], $address['district'], $address['city']) ?
+                    $address['street'] . ', ' . $address['ward'] . ', ' . $address['district'] . ', ' . $address['city'] :
+                    'Không có địa chỉ';
+                $order['delivery_status'] = $order['delivery_date'];
             }
 
-            // Trả về JSON
             header('Content-Type: application/json');
             echo json_encode([
                 'orders' => array_values($paginatedData),
@@ -97,11 +139,11 @@ class OrderController
                 'currentPage' => $currentPage
             ]);
         } catch (Exception $e) {
-            // Xử lý lỗi nếu có, trả về lỗi dưới dạng text
             header('Content-Type: text/plain');
-            echo "Error: " . $e->getMessage(); // Trả về thông điệp lỗi dưới dạng văn bản
+            echo "Error: " . $e->getMessage();
         }
     }
+
 
     public function placeOrder($userId, $items, $total, $addressId, $paymentMethod, $status)
     {
@@ -137,6 +179,33 @@ class OrderController
             ]);
         }
     }
+
+    public function cancelOrder($orderId)
+    {
+        try {
+            // Lấy đơn hàng theo ID
+            $order = $this->orderModel->getOrderById($orderId);
+
+            if (!$order) {
+                echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy đơn hàng']);
+                return;
+            }
+
+            // Kiểm tra trạng thái hiện tại (chỉ cho hủy nếu chưa giao)
+            if ($order['status'] !== 'Chưa xử lý') {
+                echo json_encode(['status' => 'error', 'message' => 'Không thể hủy đơn hàng ở trạng thái hiện tại']);
+                return;
+            }
+
+            // Cập nhật trạng thái đơn hàng thành "Đã hủy"
+            $this->orderModel->updateOrderStatus($orderId, 'Đã hủy');
+
+            echo json_encode(['status' => 'success', 'message' => 'Đơn hàng đã được hủy']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => 'Lỗi khi hủy đơn: ' . $e->getMessage()]);
+        }
+    }
+
 
 
     public function getOrderDetail($orderId)
@@ -189,6 +258,21 @@ class OrderController
             echo json_encode(['status' => 'error', 'message' => 'Lỗi chi tiết đơn hàng: ' . $e->getMessage()]);
         }
     }
+
+    public function updateOrderStatus($orderId, $newStatus)
+    {
+        try {
+            $result = $this->orderModel->updateOrderStatus($orderId, $newStatus);
+
+            if ($result) {
+                echo json_encode(['status' => 'success', 'message' => 'Cập nhật trạng thái thành công']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Cập nhật thất bại']);
+            }
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => 'Lỗi: ' . $e->getMessage()]);
+        }
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -236,12 +320,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
-            $status = 'pending'; // hoặc 'đang xử lý'
+            $status = 'Chưa xử lý'; // hoặc 'đang xử lý'
 
             // Gọi hàm đặt hàng
             $orderController = new OrderController();
             $orderController->placeOrder($userId, $items, $total, $addressId, $paymentMethod, $status);
             break;
+
+        case 'cancelOrder':
+            $orderId = $data['orderId'] ?? null;
+            if (!$orderId) {
+                echo json_encode(['status' => 'error', 'message' => 'Thiếu mã đơn hàng']);
+                exit;
+            }
+            $controller = new OrderController();
+            $controller->cancelOrder($orderId);
+            break;
+
+
+        case 'updateStatus':
+            $orderId = $data['orderId'] ?? null;
+            $newStatus = $data['newStatus'] ?? null;
+
+            if (!$orderId || !$newStatus) {
+                echo json_encode(['status' => 'error', 'message' => 'Thiếu orderId hoặc trạng thái']);
+                exit;
+            }
+
+            $orderController = new OrderController();
+            $orderController->updateOrderStatus($orderId, $newStatus);
+            break;
+
 
         default:
             echo json_encode(['status' => 'error', 'message' => 'Hành động không hợp lệ']);
@@ -252,14 +361,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     switch ($action) {
         case 'listOrders':
-            $userId = $_SESSION['userId'] ?? null;
-            if (!$userId) {
-                echo json_encode(['status' => 'error', 'message' => 'Chưa đăng nhập']);
-                exit;
-            }
+            // $userId = $_SESSION['userId'] ?? null;
+            // $adminId = $_SESSION['adminId'] ?? null;
+            // if (!$userId || !$adminId) {
+            //     echo json_encode(['status' => 'error', 'message' => 'Chưa đăng nhập']);
+            //     exit;
+            // }
 
             $orderController = new OrderController();
-            $orderController->listOrders($userId);
+            $orderController->listOrders();
             break;
 
         case 'getOrderDetails':

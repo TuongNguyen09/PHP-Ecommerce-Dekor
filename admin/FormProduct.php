@@ -1,3 +1,17 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['adminId'])) {
+    echo "<script>
+        alert('Vui lòng đăng nhập với quyền admin');
+        window.location.href = 'signinadmin.php';
+    </script>";
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -21,97 +35,9 @@
 </head>
 
 <body>
-    <header>
-        <div class="top">
-            <div class="tab_menu">
-                <i class="fas fa-bars" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button"
-                    aria-controls="offcanvasExample"></i>
-                <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample"
-                    aria-labelledby="offcanvasExampleLabel" style="width: 250px">
-                    <div class="sidebar">
-                        <div class="close_tab">
-                            <i class="fas fa-xmark" data-bs-dismiss="offcanvas"></i>
-                        </div>
-                        <div class="user">
-                            <div class="user_avatar">
-                                <i class="fa-solid fa-user fa-2x"></i>
-                            </div>
-                            <div>
-                                <div class="user_name">
-                                    <a href="./infoAdmin.html" style="color:aliceblue;"></a>
-                                </div>
-                                <div class="user_designation">
-                                    <p>Chào mừng bạn trở lại</p>
-                                </div>
-                            </div>
-                            <hr />
-                        </div>
-                        <div class="menu">
-                            <a href="../../html/admin/admin.html">
-                                <li class="menu_item">
-                                    <i class="fas fa-house"></i>Trang chủ
-                                </li>
-                            </a>
-                            <a href="../../html/admin/data_product.html">
-                                <li class="menu_item active">
-                                    <i class="fas fa-tag"></i>Quản lý sản phẩm
-                                </li>
-                            </a>
-                            <a href="../../html/admin/data_oder.html">
-                                <li class="menu_item">
-                                    <i class="fas fa-bag-shopping"></i>Quản lý đơn hàng
-                                </li>
-                            </a>
-                            <a href="../../html/admin/data_user.html">
-                                <li class="menu_item">
-                                    <i class="fas fa-address-card"></i>Quản lý người dùng
-                                </li>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="sign_out">
-                <a href="../../html/Dangnhap.html" onclick="logoutAdmin()"><i class="fas fa-right-from-bracket"></i></a>
-            </div>
-        </div>
-        <div class="sidebar">
-            <div class="user">
-                <div class="user_avatar">
-                    <i class="fa-solid fa-user fa-2x"></i>
-                </div>
-                <div>
-                    <div class="user_name">
-                        <a href="./infoAdmin.html" style="color:aliceblue;"></a>
-                    </div>
-                    <div class="user_designation">
-                        <p>Chào mừng bạn trở lại</p>
-                    </div>
-                </div>
-                <hr />
-            </div>
-            <div class="menu">
-                <a href="../../html/admin/admin.html">
-                    <li class="menu_item"><i class="fas fa-house"></i>Trang chủ</li>
-                </a>
-                <a href="../../html/admin/data_product.html">
-                    <li class="menu_item active">
-                        <i class="fas fa-tag"></i>Quản lý sản phẩm
-                    </li>
-                </a>
-                <a href="../../html/admin/data_oder.html">
-                    <li class="menu_item">
-                        <i class="fas fa-bag-shopping"></i>Quản lý đơn hàng
-                    </li>
-                </a>
-                <a href="../../html/admin/data_user.html">
-                    <li class="menu_item">
-                        <i class="fas fa-address-card"></i>Quản lý người dùng
-                    </li>
-                </a>
-            </div>
-        </div>
-    </header>
+    <?php
+    include './Header.php';
+    ?>
 
     <div class="content">
         <div class="row">
@@ -139,10 +65,12 @@
                     <div class="form_group col-12 col-sm-6 col-lg-3">
                         <label>Tên sản phẩm</label>
                         <input type="text" class="form-control" id="title" name="title" />
+                        <small id="error-title" class="text-danger"></small>
                     </div>
                     <div class="form_group col-12 col-sm-6 col-lg-3">
                         <label>Số lượng</label>
                         <input type="number" class="form-control" id="amount" name="amount" />
+                        <small id="error-amount" class="text-danger"></small>
                     </div>
                     <div class="form_group col-12 col-sm-6 col-lg-3">
                         <label>Tình trạng</label>
@@ -151,35 +79,42 @@
                             <option value="Còn hàng">Còn hàng</option>
                             <option value="Hết hàng">Hết hàng</option>
                         </select>
+                        <small id="error-status" class="text-danger"></small>
                     </div>
                     <div class="form_group col-12 col-sm-6 col-lg-3">
                         <label>Danh mục</label>
                         <select class="form-select" id="category" name="category">
-                            <!-- Các options được điền thông qua JavaScript hoặc từ server -->
+                            <option value="" selected>--Danh mục--</option>
+                            <!-- Options -->
                         </select>
+                        <small id="error-category" class="text-danger"></small>
                     </div>
                     <div class="form_group col-12 col-sm-6 col-lg-3">
                         <label>Nhà cung cấp</label>
                         <select class="form-select" id="Suppliers" name="Suppliers">
                             <option selected>--Nhà cung cấp--</option>
-                            <!-- Các options được điền thông qua JavaScript hoặc từ server -->
+                            <!-- Options -->
                         </select>
+                        <small id="error-suppliers" class="text-danger"></small>
                     </div>
                     <div class="form_group col-12 col-sm-6 col-lg-3">
                         <label>Giá bán</label>
                         <input type="number" class="form-control" id="price" name="price" />
+                        <small id="error-price" class="text-danger"></small>
                     </div>
                     <div class="form_group col-12 col-sm-6 col-lg-3">
                         <label>Ảnh sản phẩm</label>
                         <button class="hinh form-control" type="button" id="uploadBtn">Tải ảnh</button>
                         <input style="display: none" type="file" id="files" name="image" />
                         <span id="previewImg"></span>
+                        <small id="error-image" class="text-danger"></small>
                     </div>
                     <div class="form_group col-12">
                         <label>Mô tả sản phẩm</label>
                         <div contenteditable="true" id="editableDiv">
                             Bạn có thể nhập văn bản và chèn hình ảnh vào đây.
                         </div>
+                        <small id="error-description" class="text-danger"></small>
                     </div>
                 </div>
                 <div class="element_btn">
@@ -193,7 +128,6 @@
                     </div>
                 </div>
             </form>
-
         </div>
     </div>
 
@@ -202,12 +136,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script src="../../bootstrap-5.2.2-dist/js/bootstrap.bundle.js"></script>
     <script src="../../js/jquery.min.js"></script>
-    <script src="../../js/data.js"></script>
-    <script src="../../js/editProduct.js"></script>
-    <script src="../../js/admin.js"></script>
-    <script src="../../js/account.js"></script>
-    <script src="../../js/accountAdmin.js"></script>
-    <script src="../../js/checkSignInAdmin.js"></script>
     <script>
         let savedRange = null;
         const editableDiv = document.getElementById("editableDiv");
@@ -256,15 +184,17 @@
                 range.deleteContents();
                 range.insertNode(imgElement);
 
+                // Nếu cần, tạo thẻ br sau ảnh để đảm bảo không bị dính ảnh vào text tiếp theo
                 const br = document.createElement("br");
                 range.insertNode(br);
 
+                // Cập nhật vị trí con trỏ mới
                 range.setStartAfter(br);
                 range.setEndAfter(br);
                 selection.removeAllRanges();
                 selection.addRange(range);
 
-                // Cập nhật vị trí con trỏ mới
+                // Cập nhật lại savedRange
                 savedRange = selection.getRangeAt(0).cloneRange();
             } else {
                 // Nếu không có range hợp lệ, thêm vào cuối editableDiv
@@ -275,8 +205,14 @@
 
         // Trước khi submit, đưa nội dung vào input ẩn
         form.addEventListener('submit', function() {
-            hiddenDescription.value = editableDiv.innerHTML;
+            // Lọc thẻ <br> nếu cần thiết
+            let content = editableDiv.innerHTML;
+            content = content.replace(/<br\s*\/?>/g, ''); // Lọc tất cả các thẻ <br>
+
+            // Đặt nội dung vào input ẩn
+            hiddenDescription.value = content;
         });
+
 
 
 
@@ -357,8 +293,23 @@
                             document.getElementById('title').value = data.name;
                             document.getElementById('amount').value = data.stock;
                             document.getElementById('status').value = data.stock > 0 ? 'Còn hàng' : 'Hết hàng';
-                            document.getElementById('category').value = data.category_id;
-                            document.getElementById('Suppliers').value = data.brand_id;
+                            const categorySelect = document.getElementById('category');
+                            const supplierSelect = document.getElementById('Suppliers');
+
+                            // Tìm và chọn option có text trùng với data.category_name
+                            Array.from(categorySelect.options).forEach(option => {
+                                if (option.text === data.category_name) {
+                                    option.selected = true; // Gán thuộc tính selected cho option tương ứng
+                                }
+                            });
+
+                            // Tìm và chọn option có text trùng với data.brand_name
+                            Array.from(supplierSelect.options).forEach(option => {
+                                if (option.text === data.brand_name) {
+                                    option.selected = true; // Gán thuộc tính selected cho option tương ứng
+                                }
+                            });
+
                             document.getElementById('price').value = data.price;
                             document.getElementById('editableDiv').innerHTML = data.description;
 
@@ -416,21 +367,92 @@
                 }
             });
 
-            // Khi nhấn "Lưu", gửi tệp ảnh và dữ liệu form lên server
+            function checkValidate() {
+                let isValid = true;
+
+                const title = document.getElementById('title');
+                const amount = document.getElementById('amount');
+                const status = document.getElementById('status');
+                const category = document.getElementById('category');
+                const suppliers = document.getElementById('Suppliers');
+                const price = document.getElementById('price');
+                const file = document.getElementById('files');
+                const description = document.getElementById('editableDiv');
+
+                // Xóa lỗi cũ
+                [
+                    'error-title', 'error-amount', 'error-status', 'error-category',
+                    'error-suppliers', 'error-price', 'error-image', 'error-description'
+                ].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerText = '';
+                });
+
+                // Kiểm tra các trường
+                if (!title.value.trim()) {
+                    document.getElementById('error-title').innerText = 'Vui lòng nhập tên sản phẩm';
+                    isValid = false;
+                }
+
+                if (!amount.value || parseInt(amount.value) < 0) {
+                    document.getElementById('error-amount').innerText = 'Số lượng phải >= 0';
+                    isValid = false;
+                }
+
+                if (!status.value || status.value === '--Tình trạng--') {
+                    document.getElementById('error-status').innerText = 'Vui lòng chọn tình trạng';
+                    isValid = false;
+                }
+
+                if (!category.value) {
+                    document.getElementById('error-category').innerText = 'Vui lòng chọn danh mục';
+                    isValid = false;
+                }
+
+                if (!suppliers.value || suppliers.value === '--Nhà cung cấp--') {
+                    document.getElementById('error-suppliers').innerText = 'Vui lòng chọn nhà cung cấp';
+                    isValid = false;
+                }
+
+                if (!price.value || parseInt(price.value) <= 0) {
+                    document.getElementById('error-price').innerText = 'Giá bán phải > 0';
+                    isValid = false;
+                }
+
+                // Kiểm tra nếu người dùng không chọn ảnh mới và có ảnh cũ, thì không cần yêu cầu chọn lại ảnh
+                if (!file.files.length && !document.getElementById('previewImg').querySelector('img')) {
+                    document.getElementById('error-image').innerText = 'Vui lòng chọn ảnh sản phẩm';
+                    isValid = false;
+                }
+
+
+                if (!description.innerText.trim()) {
+                    document.getElementById('error-description').innerText = 'Vui lòng nhập mô tả sản phẩm';
+                    isValid = false;
+                }
+
+                return isValid;
+            }
+
+
+
             saveBtn.addEventListener('click', function(e) {
                 e.preventDefault();
 
-                // ✅ Ghi nội dung vào input ẩn trước khi tạo FormData
+                // Ghi nội dung vào input ẩn
                 document.getElementById('hiddenDescription').value = document.getElementById('editableDiv').innerHTML;
-                console.log(document.getElementById('hiddenDescription').value);
-                const formData = new FormData(form);
 
+                // ✅ Kiểm tra hợp lệ trước khi tiếp tục
+                if (!checkValidate()) {
+                    return;
+                }
+
+                const formData = new FormData(form);
                 const file = fileInput.files[0];
                 if (file) {
                     formData.append('image', file);
                 }
 
-                // (Phần còn lại giữ nguyên)
                 const action = productId ? 'updateProduct' : 'addProduct';
                 formData.append('action', action);
                 if (productId) formData.append('id', productId);
@@ -451,7 +473,10 @@
                     })
                     .then(data => {
                         if (data && data.success) {
+                            // Hiển thị thông báo thành công trước khi tải lại trang
                             alert('Sản phẩm đã được lưu!');
+                            // Tải lại trang sau khi thông báo
+                            window.location.reload();
                         } else {
                             alert('Có lỗi xảy ra: ' + (data ? data.error : 'Không có thông tin phản hồi'));
                         }

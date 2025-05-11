@@ -1,3 +1,17 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['adminId'])) {
+    echo "<script>
+        alert('Vui lòng đăng nhập với quyền admin');
+        window.location.href = 'signinadmin.php';
+    </script>";
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -53,6 +67,7 @@
             <ul class="tab">
                 <li class="tab_item active_tab" onclick="openTab('dateFilter', this)">Lọc theo ngày</li>
                 <li class="tab_item" onclick="openTab('statusFilter', this)">Lọc theo tình trạng</li>
+                <li class="tab_item" onclick="openTab('addressFilter', this)">Lọc theo địa chỉ</li>
             </ul>
             <div id="dateFilter" class="filter-container filter-date tab-content active">
                 <div class="filter-group">
@@ -63,20 +78,46 @@
                     <label for="toDate" class="filter-label">Đến ngày:</label>
                     <input type="date" class="filter-input" id="toDate">
                 </div>
-                <button onclick="filterOrdersByDate()" class="filter-button">Lọc</button>
+                <button id="filterByTime" class="filter-button">Lọc</button>
             </div>
 
             <div id="statusFilter" class="filter-status tab-content">
                 <label class="filter-label" for="status">Chọn tình trạng:</label>
-                <select class="filter-input" id="status">
+                <select class="filter-input" id="status" style="background-color:#fff;">
                     <option value="Tất cả">Tất cả</option>
                     <option value="Chưa xử lý">Chưa xử lý</option>
                     <option value="Đã xác nhận">Đã xác nhận</option>
                     <option value="Đã giao thành công">Đã giao thành công</option>
                     <option value="Đã hủy">Đã hủy</option>
                 </select>
-                <button onclick="filterOrdersByStatus()" class="filter-button">Lọc</button>
+                <button id="filterByStatus" class="filter-button">Lọc</button>
             </div>
+
+            <div id="addressFilter" class="filter-status tab-content">
+                <div class="filter-group" style="width:33%">
+                    <label for="city" class="filter-label">Tỉnh/Thành:</label>
+                    <select class="filter-input" style="width:90%" id="city">
+                        <option value="--Chọn Tỉnh/Thành--">--Chọn Tỉnh/Thành--</option>
+                        <!-- Add other options here -->
+                    </select>
+                </div>
+                <div class="filter-group" style="width:33%">
+                    <label for="district" class="filter-label">Quận/Huyện:</label>
+                    <select class="filter-input" style="width:90%" id="district">
+                        <option value="--Chọn Quận/Huyện--">--Chọn Quận/Huyện--</option>
+                        <!-- Add other options here -->
+                    </select>
+                </div>
+                <div class="filter-group" style="width:33%">
+                    <label for="ward" class="filter-label">Phường/Xã:</label>
+                    <select class="filter-input" style="width:90%" id="ward">
+                        <option value="--Chọn Phường/Xã--">--Chọn Phường/Xã--</option>
+                        <!-- Add other options here -->
+                    </select>
+                </div>
+                <button id="filterByAddress" class="filter-button">Lọc</button>
+            </div>
+
 
 
             <div class="table-responsive-lg">
@@ -145,7 +186,7 @@
 
                 <div class="form-group">
                     <label for="dateOrder">Ngày Đặt:</label>
-                    <input type="date" id="dateOrder" value="">
+                    <input disabled type="date" id="dateOrder" value="">
                 </div>
 
                 <div class="form-group">
@@ -155,7 +196,7 @@
 
                 <div class="form-group">
                     <label for="status">Tình Trạng:</label>
-                    <select id="status-select">
+                    <select id="status-select" style="background-color:#fff;">
                         <option value="Chưa xử lý">Chưa xử lý</option>
                         <option value="Đã xác nhận">Đã xác nhận</option>
                         <option value="Đã giao thành công">Đã giao thành công</option>
@@ -237,8 +278,10 @@
         }
 
         document.getElementById("closeButton").addEventListener("click", closeOrderDetail);
+        let currentOrderId = null;
 
         function showOrderDetails(orderId) {
+            currentOrderId = orderId;
             fetch(`../controllers/OrderController.php?action=getOrderDetails&id=${orderId}`)
                 .then(res => res.text())
                 .then(text => {
@@ -267,7 +310,7 @@
                     document.getElementById('dateDeliver').value = order.delivery_date || '';
                     document.getElementById('status-select').value = order.status;
                     document.getElementById('payment').value = order.payment_method;
-                    document.getElementById('address').value = order.address_detail || 'Chưa có địa chỉ';
+                    document.getElementById('address').value = order.address || 'Chưa có địa chỉ';
 
                     let totalAmount = 0;
                     const productsTableBody = document.querySelector('.order-products-table tbody');
@@ -308,62 +351,231 @@
             document.getElementById('orderOverlay').style.display = 'none';
         });
 
-        // Cập nhật thông tin đơn hàng (Nếu cần)
-        document.getElementById('saveButton').addEventListener('click', () => {
-            const status = document.getElementById('status-select').value;
-            const deliveryDate = document.getElementById('dateDeliver').value;
 
-            // Gửi dữ liệu đã cập nhật lên server
-            fetch(`../controllers/OrderController.php?action=updateOrder`, {
+        document.querySelectorAll('.btn-view-order').forEach(button => {
+            button.addEventListener('click', function() {
+                currentOrderId = this.getAttribute('data-id');
+
+                // Mở form và load dữ liệu từ server
+                document.getElementById('orderOverlay').style.display = 'block';
+
+                // (Gợi ý) Gửi request lấy chi tiết order và điền vào form tại đây...
+            });
+        });
+
+
+        // Cập nhật thông tin đơn hàng (Nếu cần)
+        document.getElementById('saveButton').addEventListener('click', function() {
+            const orderId = currentOrderId;
+            const newStatus = document.getElementById('status-select').value;
+            console.log(orderId);
+            console.log(newStatus);
+
+            fetch('../controllers/OrderController.php', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json', // Sửa lại content-type
                     },
                     body: JSON.stringify({
+                        action: 'updateStatus',
                         orderId: orderId,
-                        status: status,
-                        deliveryDate: deliveryDate
+                        newStatus: newStatus
                     })
                 })
-                .then(response => response.json())
+                .then(response => response.json()) // Sử dụng response.json() thay vì response.text()
                 .then(data => {
-                    if (data.success) {
-                        alert('Cập nhật đơn hàng thành công');
+                    if (data.status === 'success') {
+                        alert(data.message); // Hiển thị thông báo từ server
                         document.getElementById('orderOverlay').style.display = 'none';
+                        // Có thể reload lại danh sách đơn hàng nếu cần
                     } else {
-                        alert('Cập nhật đơn hàng thất bại');
+                        alert(data.message); // Nếu có lỗi, hiển thị thông báo lỗi từ server
                     }
                 })
                 .catch(error => {
-                    console.error('Lỗi khi cập nhật đơn hàng:', error);
-                    alert('Đã xảy ra lỗi khi cập nhật đơn hàng.');
+                    console.error('Lỗi cập nhật:', error);
+                    alert('Đã xảy ra lỗi');
                 });
         });
+
+
 
 
         function renderOrders(orders) {
             const tbody = document.querySelector('#order_list');
             tbody.innerHTML = ''; // Xóa bảng trước khi render lại
 
+            if (!orders || orders.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td colspan="7" style="text-align: center; color: red;">Không tìm thấy đơn hàng phù hợp</td>
+        `;
+                tbody.appendChild(row);
+                return;
+            }
+
             orders.forEach(order => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
             <td>#${order.id}</td>
-            <td>${order.fullname}</td>
+            <td>${order.user.fullname}</td>
             <td style="width:200px">${order.address_detail}</td>
             <td>${order.order_date}</td>
             <td>${order.delivery_date ? order.delivery_date : 'Chưa giao'}</td>
             <td>${order.status}</td>
             <td>
                 <button onclick="showOrderDetails(${order.id})" class="btn btn-primary btn-sm btn-detail"
-                        type="button" title="Xem chi tiết">Xem chi tiết</button>
+                        type="button" title="Xem chi tiết" >Xem chi tiết</button>
             </td>
         `;
                 tbody.appendChild(row);
             });
         }
 
+
+        // Lọc theo thời gian
+        document.getElementById('filterByTime').addEventListener('click', function() {
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+
+            const params = new URLSearchParams(window.location.search); // Dùng từ URL hiện tại
+
+            if (fromDate && fromDate !== '') {
+                params.set('fromDate', fromDate);
+                params.delete('status'); // Xóa tham số status nếu có
+                params.delete('city'); // Xóa tham số city nếu có
+                params.delete('district'); // Xóa tham số district nếu có
+                params.delete('ward'); // Xóa tham số ward nếu có
+            } else {
+                params.delete('fromDate');
+            }
+
+            if (toDate && toDate !== '') {
+                params.set('toDate', toDate);
+                params.delete('status'); // Xóa tham số status nếu có
+                params.delete('city'); // Xóa tham số city nếu có
+                params.delete('district'); // Xóa tham số district nếu có
+                params.delete('ward'); // Xóa tham số ward nếu có
+            } else {
+                params.delete('toDate');
+            }
+
+            params.set('page', 1); // Reset về trang đầu sau khi lọc
+
+            updateUrl(params);
+        });
+
+        // Lọc theo tình trạng
+        document.getElementById('filterByStatus').addEventListener('click', function() {
+            const status = document.getElementById('status').value;
+
+            const params = new URLSearchParams(window.location.search); // Giữ lại các params khác
+
+            if (status && status !== 'Tất cả') {
+                params.set('status', status);
+                params.delete('fromDate'); // Xóa tham số fromDate nếu có
+                params.delete('toDate'); // Xóa tham số toDate nếu có
+                params.delete('city'); // Xóa tham số city nếu có
+                params.delete('district'); // Xóa tham số district nếu có
+                params.delete('ward'); // Xóa tham số ward nếu có
+            } else {
+                params.delete('status');
+            }
+
+            params.set('page', 1); // Reset về trang đầu
+
+            updateUrl(params);
+        });
+
+        // Lọc theo địa chỉ
+        document.getElementById('filterByAddress').addEventListener('click', function() {
+            const city = document.getElementById('city').selectedOptions[0].textContent;
+            const district = document.getElementById('district').selectedOptions[0].textContent;
+            const ward = document.getElementById('ward').selectedOptions[0].textContent;
+
+            const params = new URLSearchParams(window.location.search); // Giữ lại các params khác
+
+            if (city && city !== '--Chọn Tỉnh/Thành--') {
+                params.set('city', city);
+                params.delete('fromDate'); // Xóa tham số fromDate nếu có
+                params.delete('toDate'); // Xóa tham số toDate nếu có
+                params.delete('status'); // Xóa tham số status nếu có
+                params.delete('district'); // Xóa tham số district nếu có
+                params.delete('ward'); // Xóa tham số ward nếu có
+            } else {
+                params.delete('city');
+            }
+
+            if (district && district !== '--Chọn Quận/Huyện--') {
+                params.set('district', district);
+                params.delete('fromDate'); // Xóa tham số fromDate nếu có
+                params.delete('toDate'); // Xóa tham số toDate nếu có
+                params.delete('status'); // Xóa tham số status nếu có
+                params.delete('city'); // Xóa tham số city nếu có
+                params.delete('ward'); // Xóa tham số ward nếu có
+            } else {
+                params.delete('district');
+            }
+
+            if (ward && ward !== '--Chọn Phường/Xã--') {
+                params.set('ward', ward);
+                params.delete('fromDate'); // Xóa tham số fromDate nếu có
+                params.delete('toDate'); // Xóa tham số toDate nếu có
+                params.delete('status'); // Xóa tham số status nếu có
+                params.delete('city'); // Xóa tham số city nếu có
+                params.delete('district'); // Xóa tham số district nếu có
+            } else {
+                params.delete('ward');
+            }
+
+            params.set('page', 1); // Reset về trang đầu
+
+            updateUrl(params);
+        });
+
+        // Lọc theo địa chỉ
+        document.getElementById('filterByAddress').addEventListener('click', function() {
+            const city = document.getElementById('city').selectedOptions[0].textContent;
+            const district = document.getElementById('district').selectedOptions[0].textContent;
+            const ward = document.getElementById('ward').selectedOptions[0].textContent;
+
+            const params = new URLSearchParams(window.location.search); // Giữ lại các params khác
+
+            if (city && city !== '--Chọn Tỉnh/Thành--') {
+                params.set('city', city);
+            } else {
+                params.delete('city');
+            }
+
+            if (district && district !== '--Chọn Quận/Huyện--') {
+                params.set('district', district);
+            } else {
+                params.delete('district');
+            }
+
+            if (ward && ward !== '--Chọn Phường/Xã--') {
+                params.set('ward', ward);
+            } else {
+                params.delete('ward');
+            }
+
+            params.set('page', 1); // Reset về trang đầu
+
+            updateUrl(params);
+        });
+
+
+
+
+
         function fetchOrdersFromServer(params) {
+            // Kiểm tra nếu có product_id trên URL và thêm vào params
+            const urlParams = new URLSearchParams(window.location.search); // Lấy các tham số từ URL hiện tại
+            if (urlParams.has('product_id')) {
+                const productId = urlParams.get('product_id');
+                params.set('product_id', productId); // Thêm product_id vào params nếu có
+            }
+
             const queryString = params.toString(); // Tạo query string từ params
             console.log("Fetching orders with params:", queryString);
 
@@ -380,7 +592,6 @@
                     if (data.startsWith("Error:")) {
                         console.error("Error fetching orders:", data); // Hiển thị thông báo lỗi nếu có
                     } else {
-                        // Nếu dữ liệu không phải là lỗi, giả định là JSON đã được trả về
                         try {
                             const jsonData = JSON.parse(data);
                             if (Array.isArray(jsonData.orders)) {
@@ -404,22 +615,15 @@
                 .catch(error => console.error('Fetch error:', error));
         }
 
-
-
         function updateUrl(params) {
-            const currentParams = new URLSearchParams(window.location.search);
-
-            // Giữ nguyên các tham số hiện tại trong URL (bao gồm cả page)
-            params.forEach((value, key) => {
-                currentParams.set(key, value); // Cập nhật hoặc thêm các tham số mới vào URL
-            });
-
-            // Cập nhật URL với tất cả các tham số hiện tại
-            history.pushState(null, '', '?' + currentParams.toString());
+            // Cập nhật URL với các tham số mới
+            history.pushState(null, '', '?' + params.toString());
 
             // Gọi lại API với tham số mới
-            fetchOrdersFromServer(currentParams);
+            fetchOrdersFromServer(params);
         }
+
+
 
         // Phân trang
         function renderPagination(totalPages, currentPage) {
@@ -483,6 +687,105 @@
 
             fetchOrdersFromServer(urlParams);
         };
+        async function fetchProvinces() {
+            try {
+                const response = await fetch('https://provinces.open-api.vn/api/?depth=1');
+                if (!response.ok) throw new Error('Failed to fetch provinces');
+                const data = await response.json();
+                const citySelect = document.getElementById('city');
+                data.forEach(province => {
+                    const option = document.createElement('option');
+                    option.value = province.code;
+                    option.textContent = province.name;
+                    citySelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching provinces:', error);
+            }
+        }
+
+        // Fetch districts (Quận/Huyện)
+        async function fetchDistricts(provinceCode) {
+            const districtSelect = document.getElementById('district');
+            districtSelect.innerHTML = '<option value="">--Chọn Quận/Huyện--</option>';
+            districtSelect.disabled = true;
+            if (provinceCode) {
+                try {
+                    const response = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+                    if (!response.ok) throw new Error('Failed to fetch districts');
+                    const data = await response.json();
+                    districtSelect.disabled = false;
+                    data.districts.forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district.code;
+                        option.textContent = district.name;
+                        districtSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error fetching districts:', error);
+                }
+            }
+        }
+
+        // Fetch wards (Phường/Xã)
+        async function fetchWards(districtCode) {
+            const wardSelect = document.getElementById('ward');
+            wardSelect.innerHTML = '<option value="">--Chọn Phường/Xã--</option>';
+            wardSelect.disabled = true;
+            if (districtCode) {
+                try {
+                    const response = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+                    if (!response.ok) throw new Error('Failed to fetch wards');
+                    const data = await response.json();
+                    wardSelect.disabled = false;
+                    data.wards.forEach(ward => {
+                        const option = document.createElement('option');
+                        option.value = ward.code;
+                        option.textContent = ward.name;
+                        wardSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error fetching wards:', error);
+                }
+            }
+        }
+
+        // Setup event listeners for address selection
+        function setupAddressSelection() {
+            const citySelect = document.getElementById('city');
+            const districtSelect = document.getElementById('district');
+            const wardSelect = document.getElementById('ward');
+
+            citySelect.addEventListener('change', () => {
+                const provinceCode = citySelect.value;
+                if (provinceCode) {
+                    fetchDistricts(provinceCode);
+                    districtSelect.disabled = false;
+                } else {
+                    districtSelect.innerHTML = '<option value="">--Chọn Quận/Huyện--</option>';
+                    districtSelect.disabled = true;
+                    wardSelect.innerHTML = '<option value="">--Chọn Phường/Xã--</option>';
+                    wardSelect.disabled = true;
+                }
+            });
+
+            districtSelect.addEventListener('change', () => {
+                const districtCode = districtSelect.value;
+                if (districtCode) {
+                    fetchWards(districtCode);
+                    wardSelect.disabled = false;
+                } else {
+                    wardSelect.innerHTML = '<option value="">--Chọn Phường/Xã--</option>';
+                    wardSelect.disabled = true;
+                }
+            });
+        }
+
+        // Initialize form with provinces
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchProvinces();
+            setupAddressSelection();
+        });
     </script>
 
 </body>

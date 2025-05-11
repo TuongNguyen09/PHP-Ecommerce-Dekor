@@ -17,25 +17,91 @@ class ProductModel
     public function getAllProducts($filters = [])
     {
         $query = "SELECT * FROM " . $this->table . " WHERE 1";
+        $params = [];
 
         // Lọc theo category nếu có
         if (isset($filters['category']) && !empty($filters['category'])) {
-            $categories = implode(",", array_map('intval', $filters['category']));  // Chuyển mảng thành chuỗi
-            $query .= " AND category_id IN ($categories)";
+            $placeholders = implode(',', array_fill(0, count($filters['category']), '?'));
+            $query .= " AND category_id IN ($placeholders)";
+            $params = array_merge($params, $filters['category']);
         }
 
         // Lọc theo brand nếu có
         if (isset($filters['brand']) && !empty($filters['brand'])) {
-            $brands = implode(",", array_map('intval', $filters['brand']));  // Chuyển mảng thành chuỗi
-            $query .= " AND brand_id IN ($brands)";
+            $placeholders = implode(',', array_fill(0, count($filters['brand']), '?'));
+            $query .= " AND brand_id IN ($placeholders)";
+            $params = array_merge($params, $filters['brand']);
         }
 
-        // Thực hiện truy vấn SQL
+        // Lọc theo từ khóa (key)
+        if (isset($filters['key']) && !empty($filters['key'])) {
+            $query .= " AND name LIKE ?";
+            $params[] = '%' . $filters['key'] . '%';
+        }
+
+        // Thực hiện truy vấn SQL an toàn
         $stmt = $this->conn->prepare($query);
-        $stmt->execute();
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getLowStockProducts($limit = 10)
+    {
+        $query = "SELECT p.*, c.name AS category_name, b.name AS brand_name
+              FROM " . $this->table . " p
+              LEFT JOIN category c ON p.category_id = c.id
+              LEFT JOIN brand b ON p.brand_id = b.id
+              WHERE p.stock < 5
+              ORDER BY p.stock ASC
+              LIMIT :limit";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public function getTopSellingProducts($limit = 10, $fromDate = null, $toDate = null)
+    {
+        $query = "SELECT p.*, c.name AS category_name, 
+                     SUM(oi.quantity) AS total_sold, 
+                     SUM(oi.quantity * p.price) AS total_revenue
+              FROM " . $this->table . " p
+              JOIN order_item oi ON p.id = oi.product_id
+              JOIN orders o ON oi.order_id = o.id
+              LEFT JOIN category c ON p.category_id = c.id
+              WHERE o.status = 'Đã giao thành công'"; // Thêm điều kiện kiểm tra trạng thái "Completed"
+
+        if (!empty($fromDate)) {
+            $query .= " AND o.order_date >= :fromDate";
+        }
+
+        if (!empty($toDate)) {
+            $query .= " AND o.order_date <= :toDate";
+        }
+
+        $query .= " GROUP BY p.id
+                ORDER BY total_sold DESC
+                LIMIT :limit";
+
+        $stmt = $this->conn->prepare($query);
+
+        if (!empty($fromDate)) {
+            $stmt->bindParam(':fromDate', $fromDate);
+        }
+
+        if (!empty($toDate)) {
+            $stmt->bindParam(':toDate', $toDate);
+        }
+
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     // Lấy danh sách sản phẩm theo tiêu chí lọc (category, brand)
     public function getProductsByCriteria($categoryIds = [], $brandIds = [])
@@ -207,6 +273,36 @@ class ProductModel
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         return $stmt->execute();
+    }
+
+    public function hideProduct($id)
+    {
+        $query = "UPDATE " . $this->table . " SET is_hide = 1 WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function setProductHide($id, $hideValue)
+    {
+        $query = "UPDATE " . $this->table . " SET is_hide = :hide WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':hide', $hideValue, PDO::PARAM_INT);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+
+    // Trong ProductModel
+    public function isProductSold($productId)
+    {
+        $query = "SELECT COUNT(*) as total FROM order_item WHERE product_id = :product_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result && $result['total'] > 0;
     }
 
     // Trong ProductModel.php
